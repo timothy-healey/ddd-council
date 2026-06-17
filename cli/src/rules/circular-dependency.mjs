@@ -1,5 +1,7 @@
 // §B circular-dependency: contexts that depend on each other, directly or
 // transitively — no clear upstream/downstream, can't evolve independently.
+import { finding } from '../finding.mjs';
+
 export const id = 'circular-dependency';
 
 // Tarjan's strongly-connected components over the context graph.
@@ -48,7 +50,7 @@ export function check(graph, config) {
   for (const comp of comps) {
     const cyclic = comp.length > 1 || (graph.contextEdges.get(comp[0])?.has(comp[0]));
     if (!cyclic) continue;
-    findings.push({
+    findings.push(finding({
       signalId: id,
       severity: 'high',
       file: '(context graph)',
@@ -57,7 +59,7 @@ export function check(graph, config) {
       suggestedMove:
         'Break the cycle: choose an upstream, invert the other dependency (e.g. via a ' +
         'domain event or a published interface), so the relationship has one direction.',
-    });
+    }));
   }
   return findings;
 }

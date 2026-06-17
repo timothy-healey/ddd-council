@@ -1,5 +1,7 @@
 // §B leaky-boundary: a module reaches into another context's internals rather
 // than its public surface.
+import { finding } from '../finding.mjs';
+
 export const id = 'leaky-boundary';
 
 export function check(graph, config) {
@@ -7,7 +9,7 @@ export function check(graph, config) {
   for (const ref of graph.refs) {
     if (!ref.isLeak) continue;
     const target = config.contexts[ref.toContext];
-    findings.push({
+    findings.push(finding({
       signalId: id,
       severity: 'high',
       file: ref.fromFile,
@@ -19,7 +21,7 @@ export function check(graph, config) {
         `Import through ${ref.toContext}'s public surface (${target.publicModules
           .map((m) => `\`${m}\``)
           .join(', ')}), or promote what you need into it.`,
-    });
+    }));
   }
   return findings;
 }

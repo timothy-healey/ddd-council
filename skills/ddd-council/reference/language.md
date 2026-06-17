@@ -2,6 +2,11 @@
 
 *Mode: design or critique · Lens: usually strategic (cross-context) or scoped to one context · Reads: a context (+ its code).*
 
+> **Register.** Surfaced per the active register (SKILL.md → *Lens*). In `workshop`
+> (default) the room workshops each term aloud — why this name, what it rejects —
+> and teaches the smell when one diverges; in `brief` it records the terms and
+> writes the artifact.
+
 ## Purpose
 
 Build or refine the **ubiquitous language** for a context — every term defined

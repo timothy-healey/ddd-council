@@ -2,6 +2,10 @@
 
 *Mode: design · Lens: strategic · Reads: intent (`DOMAIN.md` + notes), optionally the repo as a sanity check.*
 
+> **Register.** Surfaced per the active register (SKILL.md → *Lens*). In `workshop`
+> (default) the room teaches each pattern as it lands it and shows the friction
+> before converging; in `brief` it states the map and writes the artifact.
+
 ## Purpose
 
 Generate a **context map** from intent — the bounded contexts, their subdomain

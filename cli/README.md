@@ -41,7 +41,9 @@ Exit code is `1` when findings exist, `0` when clean — usable in CI.
 - **publicModules** — the context's public surface; importing through these is fine,
   importing past anything else is a leak.
 
-`/ddd-council init` can generate this from `DOMAIN.md`.
+`/ddd-council init` writes a starter `ddd-council.json` for detector-supported
+code repos (Rust today), deriving the contexts from the same scan it uses for
+`DOMAIN.md`. Tune `publicModules`/`thresholds` by hand from there.
 
 ## v1 rules (from `../skills/ddd-council/reference/signals.md` §B)
 

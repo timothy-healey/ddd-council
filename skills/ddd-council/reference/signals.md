@@ -4,9 +4,15 @@
 trace to a signal here, cited in code.*
 
 This is the concrete answer to "what does the room actually look for?" It is also
-the **rule spec for the future `detect` engine** — each signal is written so it
-could later be checked mechanically. Read by `critique`, `boundaries`, and
-`language`; informs the repo scan in `map`.
+the **rule spec for the `detect` engine** — each signal is written so it can be
+checked mechanically. §B is mechanized today; §A and §C are council-only until
+they are.
+
+**Council ↔ Detector is a partnership.** The council authors this spec (upstream
+of the engine here) *and* consumes the engine's findings (the engine is upstream
+there) — so the two evolve together. Their contract surface is §B below plus the
+`Finding` shape, defined canonically in `cli/src/finding.mjs`. Read by `critique`,
+`boundaries`, and `language`; informs the repo scan in `map`.
 
 Each entry: **what it looks like in code** (the cue) · **why it matters** ·
 **confirm with the operator** (the judgment a machine can't make alone).
@@ -119,6 +125,7 @@ and missing domain events.
   wrong), not by how many rules tripped.
 - **Intent is the operator's call.** Signals surface candidates; the operator rules
   on whether coupling/sharing was deliberate.
-- **Same shape as the engine.** Report findings as
-  `signal-id · location · why-it-matters · suggested-move` so the future `detect`
-  engine can emit into the same format.
+- **Same shape as the engine.** The finding shape is defined canonically in
+  `cli/src/finding.mjs` (the `Finding` typedef): `signalId · severity · file ·
+  line · message · suggestedMove`. Council and engine both emit it — cite that
+  file rather than restating the fields, so the shared kernel can't drift.

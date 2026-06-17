@@ -2,6 +2,10 @@
 
 *Mode: critique · Lens: strategic · Reads: the repo (the `target`).*
 
+> **Register.** Surfaced per the active register (SKILL.md → *Lens*). In `workshop`
+> (default) the room reasons through each finding aloud and teaches the anti-pattern
+> it cites; in `brief` it lists the findings and writes the artifact.
+
 **The headline verb.** Surface the **de-facto context map the code actually
 implies** — and compare it to the intended one in `DOMAIN.md` / `docs/context-map.md`.
 The gap between intent and reality is the finding.
@@ -52,9 +56,10 @@ exits `3` (engine not found / deps unavailable) or no `ddd-council.json` exists,
 skip the engine and have the room read the code itself; say so rather than
 pretend the engine ran.
 
-It returns `{ findings: [{ signalId, severity, file, line, message, suggestedMove }] }`
-for the §B import-graph signals (leaky-boundary, circular-dependency, god-module,
-cross-context-coupling) — mechanically, with exact locations. Treat each as a
+It returns `{ findings: [Finding] }` — the `Finding` shape defined canonically in
+`cli/src/finding.mjs` — for the §B import-graph signals (leaky-boundary,
+circular-dependency, god-module, cross-context-coupling), mechanically, with exact
+locations. Treat each as a
 **grounded candidate**: the room confirms it against the code, judges intent, and
 the operator rules on whether it was deliberate. The engine finds; the council
 interprets. For signals the engine doesn't yet cover (§A boundary cues, §C
@@ -76,16 +81,25 @@ language smells, schema-based shared kernel), the room reads the code itself.
    code location.
 5. **Pause** for the operator on each "is this deliberate?" question.
 
-## Output — `docs/critique-<date>.md`
+## Output — `docs/critique-<target-slug>-<date>.md`
+
+Name the file for the scoped target (`critique-cli-2026-06-18.md`,
+`critique-root-2026-06-18.md`) so runs against different targets — or the same
+target on different days — don't collide. Same target + date overwrites: the file
+is the current snapshot of that target, not a ledger. Frontmatter carries a stable
+artifact `id`.
 
 - A **Mermaid `flowchart`** of the *de-facto* map (annotate edges with the
   inferred relationship + the evidence location).
 - A **drift table**: intended vs observed, per relationship.
-- A **findings list**: each finding = `severity · what · cited location · why it
-  matters · suggested move`.
+- A **findings list**: each finding gets a stable tag in its heading —
+  `### F<n> [severity] <signalId> — <title>` — and records `what · cited location ·
+  why it matters · suggested move · status`. `status` starts `open`; `remediate`
+  round-trips it to `resolved | deferred | escalated`.
 
-The findings list uses the same shape a future `detect` engine will emit, so the
-engine can later populate it directly.
+The per-finding body uses the same `Finding` shape the `detect` engine emits
+(`cli/src/finding.mjs`); the `F<n>` tag and `status` wrap it so `remediate` can
+track and round-trip each finding.
 
 ## Guardrails
 

@@ -29,6 +29,12 @@
       "argumentHint": "[contextA contextB]",
       "mode": "both",
       "lens": "strategic"
+    },
+    "remediate": {
+      "description": "Work a critique's findings to fixes: refactor existing code first (inline, test-first), and escalate substantial new additions to a written plan. Reads docs/critique-<target-slug>-<date>.md and round-trips resolution status back into it.",
+      "argumentHint": "[target] [F<n>]",
+      "mode": "remediate",
+      "lens": "tactical"
     }
   }
 }
