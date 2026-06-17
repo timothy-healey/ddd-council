@@ -19,7 +19,10 @@ acquisition) and propose answers from what you find, rather than asking cold.
 2. **Stack** — language(s) and framework(s). (This is what a future `detect`
    engine must target, so be specific.)
 3. **Known bounded contexts** — propose a first cut from the repo's top-level
-   structure; let the operator correct names and responsibilities.
+   structure; let the operator correct names and responsibilities. For a code
+   repo in a detector-supported language (Rust today), also note each context's
+   **module** (the import/crate segment other code writes after `crate::`) and
+   **paths** (repo-relative globs of its files) — the detector config needs both.
 4. **Domain experts** — the roster (see below). Ask who the real-world authorities
    are for each context. At least one.
 5. **Default lens** — three axes: strategic or tactical, design or critique, and
@@ -76,6 +79,30 @@ default: <strategic|tactical> · <design|critique> · <workshop|brief>
 ## Ubiquitous language
 See `docs/ubiquitous-language.md`.
 ```
+
+## Also emit `ddd-council.json` (detector-supported code repos)
+
+When the target is a code repo in a language the `detect` engine supports (Rust
+today), write a starter `ddd-council.json` at the repo root alongside `DOMAIN.md`.
+This is the detector's input contract — without it `critique` can't run the engine
+(`cli/src/config.mjs` throws). Derive it from the contexts just settled:
+
+- **module** / **paths** — from step 3 above (the import segment and file globs).
+- **publicModules** — default `["api"]`; confirm the real public surface with the
+  operator (it's the line between "fine to import" and "leak").
+- **thresholds** — omit; the engine's defaults apply unless the operator tunes them.
+
+```json
+{
+  "contexts": {
+    "<context>": { "module": "<segment>", "paths": ["<glob>/**"], "publicModules": ["api"] }
+  }
+}
+```
+
+Skip it (and say so) when the repo isn't a supported language — the engine won't
+run there anyway, so the council reads the code directly. Never clobber an existing
+`ddd-council.json`; propose a diff instead.
 
 ## Guardrails
 
