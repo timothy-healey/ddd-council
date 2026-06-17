@@ -1,0 +1,20 @@
+{
+  "name": "ddd-council-detect",
+  "version": "0.1.0",
+  "description": "Deterministic DDD anti-pattern detector for Rust codebases. The code-grounded half of the ddd-council plugin.",
+  "type": "module",
+  "bin": {
+    "ddd-council-detect": "bin/ddd-council-detect.mjs"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "tree-sitter": "^0.22.4",
+    "tree-sitter-rust": "^0.24.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

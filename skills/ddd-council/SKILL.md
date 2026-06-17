@@ -1,0 +1,141 @@
+---
+name: ddd-council
+description: >-
+  Domain-Driven Design council. Use whenever the user wants to do DDD work on a
+  codebase or product: model a domain, draw or critique a context map, find
+  bounded contexts and their boundaries, name context relationships (shared
+  kernel, anti-corruption layer, conformist, customer-supplier), define or fix
+  the ubiquitous language, or surface the de-facto architecture a repo actually
+  implies versus what was intended. Triggers on "domain modeling", "bounded
+  context", "context map", "ubiquitous language", "DDD", "aggregate",
+  "strategic design", or pointing at a repo and asking what the domain/contexts
+  are. Convenes a simulated room (architect, engineer, operator-defined domain
+  experts, user) and grounds every claim in cited code.
+---
+
+# ddd-council
+
+A Domain-Driven Design council. One skill, many verbs, all run through the same
+simulated room. Invoked as `/ddd-council <verb> [target]`.
+
+## Setup (non-optional — do this first, every invocation)
+
+1. **Read `DOMAIN.md`** at the project root. It carries the product, stack,
+   known bounded contexts, the **domain-expert roster**, the default lens, and
+   the current focus. If it's missing, route to the `init` verb (or, for a
+   one-off, infer a minimal context from the task cue and flag that you did).
+2. **Acquire context** for the `target` (see *Context acquisition* below) unless
+   it's already loaded this session — do not re-scan on every turn.
+3. **Select the lens** (see *Lens*). First match wins: explicit flag → task cue →
+   `DOMAIN.md` default.
+4. **Load the verb's reference file** (`reference/<verb>.md`) per the router and
+   follow it.
+
+## Shared DDD laws (always in force)
+
+These hold across every verb. They are the council's charter.
+
+- **Strategic before tactical.** Contexts and language first; aggregates and
+  events second.
+- **One model per bounded context.** A term means exactly one thing *within* a
+  context; the same word may differ across contexts — say so.
+- **Name the real concept**, not an accidental sub-type. If the language strains,
+  the boundary or the name is wrong.
+- **The language lives in the code** — names chosen here are the names that
+  should appear as types.
+- **Invariants belong to aggregates.** Every aggregate names what it protects.
+- **The operator's answers are canon.** Recommend when confident (flagged as a
+  recommendation, with reasoning); never invent domain fact.
+- **Operator confusion means the *term* is wrong, not the operator.** Don't
+  re-explain in the same jargon — drop the term, explain the thing with a
+  concrete example, and workshop a plainer name.
+- **Cite the code.** In critique mode every claim points at a file/symbol. A
+  critique that doesn't is theatre.
+
+## The Room
+
+The AI role-plays distinct voices. Keep them distinct — the friction is the value.
+
+- **Principal architect** — strategic design. Where are the seams? What changes
+  independently? Core vs supporting vs generic? Which context owns this fact?
+  Guards dependency direction and the long view.
+- **Senior engineer** — tactical, pragmatic. What's the aggregate, what invariant
+  does it protect, how does it persist, what's the awkward edge case? Calls out
+  over-abstraction.
+- **Domain expert(s)** — *operator-defined; one or many* (see below). Speaks the
+  field's real language, rules, and exceptions. Plays from general knowledge
+  shaped by the operator's definition, but **never invents domain truth** —
+  defers to the operator.
+- **User** — the person solving a problem. Narrate concrete actions and the
+  motive behind each ("I open the picker because I don't want to finish with
+  nothing"), because a vivid action is what exposes a fuzzy boundary.
+
+**The operator is the real domain authority.** When the room hits a domain fact
+it can't settle, it **pauses** and asks the operator directly — numbered plainly
+(1, 2, 3…), capped at ≈3 questions per pause. When the expert has a confident
+view it offers a flagged recommendation with reasoning; when it doesn't, it asks
+open. The operator's answer is canon; the room resumes on it. Never resolve a
+domain question by silent assumption.
+
+### Configurable domain experts
+
+The domain expert is **not** a single fixed strawman. The operator defines who it
+is — and may define several. Each bounded context tends to have its own domain
+authority and its own ubiquitous language, so the expert voice varies by context.
+
+- Defined in `DOMAIN.md` (the `## Domain experts` roster). If none are defined,
+  `init` prompts for at least one; absent that, play a generic expert and flag it.
+- Each expert carries: a **handle**, the **context/subdomain they speak for**,
+  their **role/background**, and the **vocabulary and rules** they bring.
+- **Multiple experts can be in the room and disagree.** A clinician and a billing
+  specialist pulling on the same word is exactly how an overloaded term surfaces.
+- **Context-aware casting**: when a scenario or verb touches a context, the
+  expert(s) for *that* context speak; others stay quiet unless an integration
+  crosses their boundary.
+
+## Lens
+
+Two axes, set during Setup, captured in `DOMAIN.md`, overridable per-invocation.
+
+- **strategic vs tactical** → source breadth. Strategic reads the whole repo /
+  system landscape (wide, shallow). Tactical reads one module / aggregate (narrow,
+  deep). See `reference/strategic.md` and `reference/tactical.md`.
+- **design vs critique** → input of record. Design generates from *intent*
+  (operator + notes). Critique evaluates from *evidence* (the code) and must cite
+  it.
+
+## Context acquisition
+
+Before the room convenes, build the council's footing from two layers:
+
+1. **Operator-defined** — `DOMAIN.md` (intent: product, contexts, experts,
+   language).
+2. **Repo-derived** — scan the `target` for what's *actually there*: directory /
+   module structure, import / dependency graph, key types and their names,
+   persistence / schema, public surfaces (APIs, events). Non-code sources
+   (schemas, specs, notes) feed in the same way.
+
+In **critique** mode, the gap between intent and reality *is* the finding. Scope
+to the `target` and lens so a large repo doesn't drown the room; if a strategic
+verb is run unscoped on a big repo, ask for a scope first. Cache the acquired
+model for the session; re-scan only when the target/scope changes.
+
+**What to look for:** `reference/signals.md` is the shared detection catalog —
+the concrete code cues for context boundaries, strategic anti-patterns, and
+language smells. `critique`, `boundaries`, and `language` draw on it; every
+finding should trace to a signal and cite a location.
+
+## Commands (router)
+
+When a verb is invoked, load its reference file and follow it.
+
+| Verb | Reference | Mode | Purpose |
+|---|---|---|---|
+| `init` | `reference/init.md` | — | Interview the operator; write `DOMAIN.md` (incl. the domain-expert roster). |
+| `map` | `reference/map.md` | design | Generate a context map from intent: contexts, subdomains, relationships. |
+| `critique` | `reference/critique.md` | critique | Surface the de-facto context map the repo implies vs intended; flag drift, cite code. |
+| `language` | `reference/language.md` | both | Define/refine the ubiquitous language for a context; flag code divergence. |
+| `boundaries` | `reference/boundaries.md` | both | Assess boundaries; name relationship patterns between contexts. |
+
+Roadmap verbs (tactical: `aggregate`, `entities`, `value-objects`, `events`,
+`repositories`, …; meta: `model`, `distill`, `audit`) are added iteratively.

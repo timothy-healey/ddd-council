@@ -1,0 +1,11 @@
+# Local agent/tool state — never commit to the public repo
+.claude/settings.local.json
+**/settings.local.json
+.claude/skills/*/  # local, generated skill state (keep committed skills under skills/)
+
+# Dependencies
+node_modules/
+
+# Logs & OS cruft
+*.log
+.DS_Store

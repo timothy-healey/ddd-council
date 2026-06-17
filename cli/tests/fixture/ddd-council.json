@@ -1,0 +1,8 @@
+{
+  "contexts": {
+    "scheduling": { "module": "scheduling", "paths": ["scheduling/**"], "publicModules": ["api"] },
+    "billing": { "module": "billing", "paths": ["billing/**"], "publicModules": ["api"] },
+    "notifications": { "module": "notifications", "paths": ["notifications/**"], "publicModules": ["api"] }
+  },
+  "thresholds": { "godModuleFanIn": 4, "godModuleContexts": 2, "chattyFanOut": 3 }
+}

@@ -1,0 +1,34 @@
+{
+  "commands": {
+    "init": {
+      "description": "Interview the operator and write DOMAIN.md: product, stack, known bounded contexts, the domain-expert roster, and the default lens. Read first by every other verb.",
+      "argumentHint": "[repo-path]",
+      "mode": "setup",
+      "lens": "—"
+    },
+    "map": {
+      "description": "Generate a context map from intent: bounded contexts, subdomain classification (core/supporting/generic), and named, directed relationships between them.",
+      "argumentHint": "[notes-or-repo]",
+      "mode": "design",
+      "lens": "strategic"
+    },
+    "critique": {
+      "description": "Read the repo and surface the de-facto context map the code actually implies versus what was intended. Flags drift and anti-patterns; every claim cites code.",
+      "argumentHint": "[repo-path-or-module]",
+      "mode": "critique",
+      "lens": "strategic"
+    },
+    "language": {
+      "description": "Build or refine the ubiquitous language for a context; in critique mode, flag where the code's names diverge from the agreed language.",
+      "argumentHint": "[context-or-module]",
+      "mode": "both",
+      "lens": "strategic"
+    },
+    "boundaries": {
+      "description": "Assess bounded-context boundaries and name the relationship pattern across a seam: shared kernel, customer-supplier, conformist, anti-corruption layer, open-host, partnership, separate ways.",
+      "argumentHint": "[contextA contextB]",
+      "mode": "both",
+      "lens": "strategic"
+    }
+  }
+}

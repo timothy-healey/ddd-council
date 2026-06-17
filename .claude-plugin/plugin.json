@@ -1,0 +1,19 @@
+{
+  "name": "ddd-council",
+  "version": "0.1.0",
+  "description": "A Domain-Driven Design council for your AI harness: convene a simulated room of architect, engineer, and operator-defined domain experts to map, critique, and ground bounded contexts in real code.",
+  "author": {
+    "name": "Timothy Healey"
+  },
+  "homepage": "https://github.com/timothy-healey/ddd-council",
+  "repository": "https://github.com/timothy-healey/ddd-council",
+  "license": "Apache-2.0",
+  "keywords": [
+    "domain-driven-design",
+    "ddd",
+    "software-architecture",
+    "bounded-context",
+    "context-map",
+    "claude-skill"
+  ]
+}
