@@ -41,6 +41,10 @@ These hold across every verb. They are the council's charter.
   context; the same word may differ across contexts — say so.
 - **Name the real concept**, not an accidental sub-type. If the language strains,
   the boundary or the name is wrong.
+- **Refactor before you add.** When a recommendation can be realised either by
+  reshaping existing code or by adding new code, prefer the refactor; propose a
+  new addition only when a refactor can't carry the model. State both options and
+  name why the chosen one wins.
 - **The language lives in the code** — names chosen here are the names that
   should appear as types.
 - **Invariants belong to aggregates.** Every aggregate names what it protects.
