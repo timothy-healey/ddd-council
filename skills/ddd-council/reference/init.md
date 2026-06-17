@@ -22,9 +22,12 @@ acquisition) and propose answers from what you find, rather than asking cold.
    structure; let the operator correct names and responsibilities.
 4. **Domain experts** — the roster (see below). Ask who the real-world authorities
    are for each context. At least one.
-5. **Default lens** — strategic or tactical, design or critique. Default to
-   `strategic` + `critique` if unsure (most first sessions want to understand the
-   existing system).
+5. **Default lens** — three axes: strategic or tactical, design or critique, and
+   **workshop or brief** (the *register* — does the operator want a collaborative,
+   teaching working session, or just the conclusion and the artifact?). Default to
+   `strategic` + `critique` + `workshop` if unsure — most first sessions want to
+   understand the existing system *and* learn the discipline while doing it. Tell
+   the operator they can flip register per invocation with `--brief` / `--workshop`.
 6. **Focus** — which context/module is currently in play, if any.
 
 ## The domain-expert roster
@@ -65,7 +68,7 @@ Write to the project root. Append/update; never clobber existing operator conten
 - ...
 
 ## Lens
-default: <strategic|tactical> · <design|critique>
+default: <strategic|tactical> · <design|critique> · <workshop|brief>
 
 ## Focus
 <context/module currently in play, or "—">

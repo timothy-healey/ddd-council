@@ -2,6 +2,10 @@
 
 *Mode: critique · Lens: strategic · Reads: the repo (the `target`).*
 
+> **Register.** Surfaced per the active register (SKILL.md → *Lens*). In `workshop`
+> (default) the room reasons through each finding aloud and teaches the anti-pattern
+> it cites; in `brief` it lists the findings and writes the artifact.
+
 **The headline verb.** Surface the **de-facto context map the code actually
 implies** — and compare it to the intended one in `DOMAIN.md` / `docs/context-map.md`.
 The gap between intent and reality is the finding.

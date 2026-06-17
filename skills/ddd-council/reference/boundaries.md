@@ -2,6 +2,11 @@
 
 *Mode: design or critique · Lens: strategic · Reads: two+ contexts and their integration code.*
 
+> **Register.** Surfaced per the active register (SKILL.md → *Lens*). In `workshop`
+> (default) the room teaches the relationship pattern it names and shows the
+> architect/engineer friction over direction before settling; in `brief` it names
+> the pattern, the direction, and the move.
+
 ## Purpose
 
 Assess **bounded-context boundaries** and name the **relationship pattern** between
