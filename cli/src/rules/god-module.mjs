@@ -1,5 +1,7 @@
 // §B god-module: one module imported widely across contexts — an undeclared
 // shared kernel and a change-amplifier.
+import { finding } from '../finding.mjs';
+
 export const id = 'god-module';
 
 export function check(graph, config) {
@@ -23,7 +25,7 @@ export function check(graph, config) {
   const findings = [];
   for (const [moduleKey, g] of groups) {
     if (g.files.size >= godModuleFanIn && g.contexts.size >= godModuleContexts) {
-      findings.push({
+      findings.push(finding({
         signalId: id,
         severity: 'medium',
         file: `(module ${moduleKey})`,
@@ -34,7 +36,7 @@ export function check(graph, config) {
         suggestedMove:
           'Split it: move each context\'s concepts back into that context; keep only ' +
           'truly generic code here, behind a stable published interface.',
-      });
+      }));
     }
   }
   return findings;

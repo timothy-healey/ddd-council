@@ -56,9 +56,10 @@ exits `3` (engine not found / deps unavailable) or no `ddd-council.json` exists,
 skip the engine and have the room read the code itself; say so rather than
 pretend the engine ran.
 
-It returns `{ findings: [{ signalId, severity, file, line, message, suggestedMove }] }`
-for the §B import-graph signals (leaky-boundary, circular-dependency, god-module,
-cross-context-coupling) — mechanically, with exact locations. Treat each as a
+It returns `{ findings: [Finding] }` — the `Finding` shape defined canonically in
+`cli/src/finding.mjs` — for the §B import-graph signals (leaky-boundary,
+circular-dependency, god-module, cross-context-coupling), mechanically, with exact
+locations. Treat each as a
 **grounded candidate**: the room confirms it against the code, judges intent, and
 the operator rules on whether it was deliberate. The engine finds; the council
 interprets. For signals the engine doesn't yet cover (§A boundary cues, §C
@@ -88,8 +89,8 @@ language smells, schema-based shared kernel), the room reads the code itself.
 - A **findings list**: each finding = `severity · what · cited location · why it
   matters · suggested move`.
 
-The findings list uses the same shape a future `detect` engine will emit, so the
-engine can later populate it directly.
+The findings list uses the same `Finding` shape the `detect` engine emits
+(`cli/src/finding.mjs`), so engine output drops straight in.
 
 ## Guardrails
 

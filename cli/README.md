@@ -41,7 +41,8 @@ Exit code is `1` when findings exist, `0` when clean — usable in CI.
 - **publicModules** — the context's public surface; importing through these is fine,
   importing past anything else is a leak.
 
-`/ddd-council init` can generate this from `DOMAIN.md`.
+Write it by hand for now. `/ddd-council init` settles the bounded contexts this
+file needs; emitting it from `DOMAIN.md` automatically is on the roadmap.
 
 ## v1 rules (from `../skills/ddd-council/reference/signals.md` §B)
 

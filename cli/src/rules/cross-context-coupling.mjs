@@ -1,5 +1,7 @@
 // §B chatty coupling: a single file talking to many contexts — the boundary is
 // in the wrong place or missing a coarser contract.
+import { finding } from '../finding.mjs';
+
 export const id = 'cross-context-coupling';
 
 export function check(graph, config) {
@@ -13,7 +15,7 @@ export function check(graph, config) {
   const findings = [];
   for (const [file, g] of byFile) {
     if (g.contexts.size >= chattyFanOut) {
-      findings.push({
+      findings.push(finding({
         signalId: id,
         severity: 'medium',
         file,
@@ -23,7 +25,7 @@ export function check(graph, config) {
         suggestedMove:
           'Move the responsibility into one context, or publish a coarser operation so this ' +
           'file collaborates through one contract instead of many.',
-      });
+      }));
     }
   }
   return findings;
