@@ -35,6 +35,12 @@
       "argumentHint": "[target] [F<n>]",
       "mode": "remediate",
       "lens": "tactical"
+    },
+    "vet": {
+      "description": "Review a proposed change (plan or spec) for DDD design soundness before it is built: boundary fit, ubiquitous language, refactor-before-add, and contradictions with DOMAIN.md/spec. Reads the doc + DOMAIN.md + affected code; findings amend the plan, not the code.",
+      "argumentHint": "[plan-or-spec.md]",
+      "mode": "vet",
+      "lens": "strategic"
     }
   }
 }
