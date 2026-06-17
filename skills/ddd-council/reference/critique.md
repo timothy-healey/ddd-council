@@ -10,6 +10,10 @@
 implies** — and compare it to the intended one in `DOMAIN.md` / `docs/context-map.md`.
 The gap between intent and reality is the finding.
 
+> **Targeting a plan or spec, not code?** That's `vet`, not `critique`. `critique`
+> evaluates *evidence* (code it can cite); `vet` evaluates *intent* (a proposed
+> change). Redirect plan/spec `.md` targets to `vet`.
+
 ## Why this is the killer feature
 
 Real repos drift. Two contexts quietly share a database table → an *accidental
