@@ -1,6 +1,6 @@
 # ddd-council
 
-**A Domain-Driven Design council for your AI harness.** Convene a simulated room — a principal architect, a senior engineer, the user, and *your* domain experts — to map, critique, and ground bounded contexts in real code.
+**A Domain-Driven Design council for your AI harness.** Convene a simulated room — a principal architect, a senior engineer, the user, and *your* domain experts — to map, critique, vet, and remediate bounded contexts in real code.
 
 One skill, many DDD verbs. Point it at a repo (or a module, a schema, a notes doc) and the room reasons about your domain *from the code that's actually there*, not from vibes.
 
@@ -16,17 +16,26 @@ One skill, many DDD verbs. Point it at a repo (or a module, a schema, a notes do
 /ddd-council <verb> [target]
 ```
 
-### v1 — strategic verbs
+### The verbs
+
+**Strategic — model the domain:**
 
 | Verb | What it does |
 |---|---|
-| `init` | Interview you and write `DOMAIN.md` — the product, the stack, known bounded contexts, your **domain experts**, the default lens. Read first by every other verb. |
+| `init` | Interview you and write `DOMAIN.md` — the product, the stack, known bounded contexts, your **domain experts**, the default lens. Read first by every other verb. For code repos it also writes the `ddd-council.json` the detector needs. |
 | `map` | Generate a context map from intent: contexts, subdomains, and the relationships between them. |
-| `critique` | **The headline.** Read the repo and surface the *de-facto* context map your code actually implies — versus what you intended. Flags the drift, cites the code. |
 | `language` | Extract or refine the ubiquitous language for a context; flag where the code's names diverge. |
 | `boundaries` | Assess bounded-context boundaries and name the relationship patterns: shared kernel, customer–supplier, conformist, anti-corruption layer, open-host, partnership, separate ways. |
 
-Tactical verbs (`aggregate`, `entities`, `value-objects`, `events`, `repositories`, …) are on the roadmap.
+**Review & remediate — evaluate, then fix:**
+
+| Verb | What it does |
+|---|---|
+| `critique` | **The headline.** Review *existing code*: surface the *de-facto* context map your code implies versus what you intended, flag the drift, cite the code. |
+| `vet` | Review a *proposed change* — a plan or spec — **before** it's built: boundary fit, ubiquitous language, refactor-before-add, contradictions with declared intent. Cites design-stage smells; findings amend the plan. |
+| `remediate` | Work a critique's findings to fixes — **refactor-first**, applied inline under TDD; substantial new additions escalate to a written plan. Round-trips resolution status back into the critique artifact. |
+
+The council works **refactor-first** — a shared law: when a fix can be made by reshaping existing code or by adding new code, it prefers the refactor and says why. Tactical verbs (`aggregate`, `entities`, `value-objects`, `events`, `repositories`, …) are on the roadmap.
 
 ### The detector (`cli/`)
 
@@ -70,9 +79,11 @@ Then, in a project:
 
 ## Status
 
-`v0.1.0` — early. Strategic verbs and the Rust import-graph detector are in;
-schema-aware detection (shared-kernel), tactical verbs, and multi-language
-grammars come next.
+`v0.1.0` — early. In: the strategic verbs, `vet` (pre-build review) and
+`remediate` (refactor-first fixes), the refactor-first shared law, and the Rust
+import-graph detector (with `init` generating its config). Next: schema-aware
+detection (shared-kernel via shared tables), tactical verbs, and multi-language
+grammars.
 
 ## License
 
