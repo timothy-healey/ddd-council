@@ -186,6 +186,7 @@ When a verb is invoked, load its reference file and follow it.
 | `critique` | `reference/critique.md` | critique | Surface the de-facto context map the repo implies vs intended; flag drift, cite code. |
 | `language` | `reference/language.md` | both | Define/refine the ubiquitous language for a context; flag code divergence. |
 | `boundaries` | `reference/boundaries.md` | both | Assess boundaries; name relationship patterns between contexts. |
+| `remediate` | `reference/remediate.md` | remediate | Work a critique's findings to fixes — refactor-first inline, escalate substantial additions to a plan. |
 
 Roadmap verbs (tactical: `aggregate`, `entities`, `value-objects`, `events`,
 `repositories`, …; meta: `model`, `distill`, `audit`) are added iteratively.
