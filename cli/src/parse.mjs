@@ -94,3 +94,74 @@ export function parseRust(source) {
   })(tree.rootNode);
   return { uses };
 }
+
+// --- Track B: diesel schema layer (additive, same grammar, same seam) -------
+// Two TOLERANT helpers behind the existing tree-sitter-rust seam. Both degrade
+// on an unfamiliar/malformed macro body — capture best-effort data, never throw.
+
+// Does this macro_invocation name diesel's `table!` macro? (`diesel::table!` or bare `table!`)
+function isTableMacro(node) {
+  const macro = node.childForFieldName('macro');
+  if (!macro) return false;
+  if (macro.type === 'identifier') return macro.text === 'table';
+  const segs = flattenPath(macro);
+  return segs.length > 0 && segs[segs.length - 1] === 'table';
+}
+
+// Flatten every leaf token (named or anonymous) under a node, in source order.
+function flattenTokens(node) {
+  const out = [];
+  (function rec(n) {
+    if (n.childCount === 0) { out.push(n); return; }
+    for (let i = 0; i < n.childCount; i++) rec(n.child(i));
+  })(node);
+  return out;
+}
+
+/**
+ * Discover diesel `table! { NAME (pk) { col -> Ty, ... } }` definitions.
+ * The outer token_tree's children are `{ NAME (pk_tree) (body_tree) }`; the
+ * column body is the LAST nested token_tree. A column is an identifier whose
+ * following token is `->`. Tolerant: never throws.
+ * @returns {Array<{ table: string, columns: string[], line: number }>}
+ */
+export function parseTableDefs(source) {
+  const out = [];
+  let tree;
+  try {
+    tree = parser.parse(source);
+  } catch {
+    return out; // unparseable source: degrade
+  }
+  (function walk(node) {
+    if (node.type === 'macro_invocation' && isTableMacro(node)) {
+      try {
+        const outer = node.namedChildren.find((c) => c.type === 'token_tree');
+        if (outer) {
+          // First identifier in the outer token tree is the table name.
+          const nameNode = outer.namedChildren.find((c) => c.type === 'identifier');
+          // The column body is the last nested token_tree (after the pk tree).
+          const bodies = outer.namedChildren.filter((c) => c.type === 'token_tree');
+          const body = bodies.length ? bodies[bodies.length - 1] : null;
+          const columns = [];
+          if (body) {
+            const toks = flattenTokens(body);
+            for (let i = 0; i < toks.length - 1; i++) {
+              if (toks[i].type === 'identifier' && toks[i + 1].text === '->') {
+                columns.push(toks[i].text);
+              }
+            }
+          }
+          if (nameNode) {
+            out.push({ table: nameNode.text, columns, line: nameNode.startPosition.row + 1 });
+          }
+        }
+      } catch {
+        // best-effort: skip this malformed def, keep scanning
+      }
+      return; // don't descend into the macro body
+    }
+    for (let i = 0; i < node.childCount; i++) walk(node.child(i));
+  })(tree.rootNode);
+  return out;
+}
