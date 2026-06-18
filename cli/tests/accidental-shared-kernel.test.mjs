@@ -11,7 +11,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const fixture = join(here, 'fixture-schema');
 const result = detect(fixture);
 const kernels = result.findings.filter((f) => f.signalId === 'accidental-shared-kernel');
-const byTable = (t) => kernels.find((f) => f.message.includes(`\`${t}\``));
+// Anchor on the parsed table token (the same `Table \`<name>\`` shape the messages
+// open with) so a table name that is a substring of another can't false-match.
+const byTable = (t) => kernels.find((f) => f.message.match(/Table `(\w+)`/)?.[1] === t);
 
 test('exports id = accidental-shared-kernel', () => {
   assert.equal(rule.id, 'accidental-shared-kernel');
@@ -41,6 +43,15 @@ test('non-null owner, non-owner writes -> high (bins)', () => {
   const f = byTable('bins');
   assert.ok(f, 'bins fires');
   assert.equal(f.severity, 'high', 'a non-owner (ordering) write raises severity');
+});
+
+test('single shared column is named once, not echoed by a redundant "sharing" clause', () => {
+  const f = byTable('orders');
+  // The per-context split already names shipment_status for each context; the union
+  // "sharing ..." clause would just repeat it, so it is dropped in this case.
+  const occurrences = (f.message.match(/shipment_status/g) || []).length;
+  assert.equal(occurrences, 2, 'named once per context, not a third time in a sharing clause');
+  assert.ok(!/sharing/.test(f.message), 'no redundant sharing clause when columns coincide');
 });
 
 test('single-context table does not fire (solo, negative control)', () => {

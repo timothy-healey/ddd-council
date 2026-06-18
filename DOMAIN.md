@@ -29,7 +29,8 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
   `owner` (config override, messaging-only) and `sharedKernel` (declared-kernel
   suppression, honoured Detector-side in v1; Council-side honouring is a named
   follow-up). `owner` and the engine-derived `definedInContext` are one concept —
-  the table's owning context — in two provenances. See `docs/ubiquitous-language.md`.
+  the table's owning context — in two provenances (carried inline here, not in the
+  gitignored `docs/`).
 
 ## Domain experts
 _Seeded from general knowledge; refine the background/vocabulary as the operator
@@ -58,4 +59,8 @@ default: strategic · critique · workshop
 —
 
 ## Ubiquitous language
-See `docs/ubiquitous-language.md`.
+The seam terms in use are carried inline above (Bounded contexts → Context
+configuration): `owner`, `sharedKernel`, and the `owner`/`definedInContext` one-concept
+ruling. A fuller glossary is the `language` verb's output of record at
+`docs/ubiquitous-language.md` — kept local (`docs/` is gitignored), so it is absent
+from a clean checkout; the canonical home for any term load-bearing on the seam is here.

@@ -121,6 +121,44 @@ test('parseTableAccesses: degrades (never throws) on garbage', () => {
   assert.ok(Array.isArray(parseTableAccesses('let x = 1;')));
 });
 
+test('parseTableAccesses: a column read in a WHERE/filter predicate is a READ, not a write', () => {
+  // The update() argument subtree contains a filter predicate; that predicate column
+  // is read, not written. Only the .set() value (and the update target) are writes.
+  const src = `diesel::update(orders::table.filter(orders::customer_id.eq(7)))
+    .set(orders::shipment_status.eq("S")).execute(c);`;
+  const acc = parseTableAccesses(src).filter((a) => a.viaScoped);
+  const customer = acc.find((a) => a.column === 'customer_id');
+  assert.ok(customer, 'customer_id access found');
+  assert.equal(customer.kind, 'read', 'a filter-predicate column is a read');
+  assert.equal(acc.find((a) => a.column === 'shipment_status').kind, 'write', '.set value is a write');
+});
+
+test('parseTableAccesses: fully-qualified crate::schema::orders::table is a touch (not dropped)', () => {
+  const src = `fn q(c:&mut C){ crate::schema::orders::table.find(1)
+    .select(crate::schema::orders::id).first(c) }`;
+  const acc = parseTableAccesses(src).filter((a) => a.viaScoped);
+  assert.ok(acc.some((a) => a.table === 'orders'), 'fully-qualified access resolves to orders');
+  assert.ok(acc.some((a) => a.table === 'orders' && a.column === 'id'), 'qualified column captured');
+});
+
+test('parseTableAccesses: diesel::update is a CRUD verb, never a pseudo-table touch', () => {
+  const acc = parseTableAccesses('diesel::update(orders::table.find(1)).set(orders::id.eq(1));');
+  assert.ok(!acc.some((a) => a.table === 'diesel'), 'no `diesel` pseudo-table');
+  assert.ok(!acc.some((a) => a.column === 'update'), 'the CRUD verb is not a column');
+  assert.ok(acc.some((a) => a.table === 'orders' && a.viaScoped), 'the real table touch survives');
+});
+
+import { parseFile } from '../src/parse.mjs';
+
+test('parseFile: one parse yields uses + tableDefs + tableAccesses over a single tree', () => {
+  const r = parseFile('use crate::schema::orders;\n' +
+    'diesel::table! { widgets (id) { id -> BigInt } }\n' +
+    'fn q(c:&mut C){ orders::table.find(1).select(orders::id).first(c) }');
+  assert.ok(r.uses.some((u) => u.segments.includes('orders')), 'uses collected');
+  assert.ok(r.tableDefs.some((d) => d.table === 'widgets'), 'defs collected');
+  assert.ok(r.tableAccesses.some((a) => a.table === 'orders' && a.viaScoped), 'accesses collected');
+});
+
 import { loadConfig } from '../src/config.mjs';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';

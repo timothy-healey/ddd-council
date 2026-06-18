@@ -5,13 +5,15 @@ import { finding } from '../finding.mjs';
 
 export const id = 'accidental-shared-kernel';
 
-// Render one context's read/write split for the message.
+// Render one context's read/write split for the message. reads/writes are kept
+// separate per column on each accessor row, so a context that both reads and writes
+// the table reports `reads/writes` — the direction survives the graph merge.
 function describe(context, rows) {
-  const cols = [...new Set(rows.flatMap((r) => r.columns))].sort();
+  const writes = [...new Set(rows.flatMap((r) => r.writes))];
+  const reads = [...new Set(rows.flatMap((r) => r.reads))];
+  const cols = [...new Set([...writes, ...reads])].sort();
   const colStr = cols.length ? ` \`${cols.join('`/`')}\`` : '';
-  const writes = rows.some((r) => r.kind === 'write');
-  const reads = rows.some((r) => r.kind === 'read');
-  const verb = reads && writes ? 'reads/writes' : writes ? 'writes' : 'reads';
+  const verb = reads.length && writes.length ? 'reads/writes' : writes.length ? 'writes' : 'reads';
   return `${context} ${verb}${colStr}`;
 }
 
@@ -31,13 +33,13 @@ export function check(graph, config) {
 
     const definedInContext = t.definedIn?.context ?? null;
 
-    // Severity ladder (write-ness consumed via accessor.kind only — never re-derived):
+    // Severity ladder (write-ness consumed via accessor.writes only — never re-derived):
     //   null owner   -> high if ANY accessor writes (every write is a non-owner write).
     //   derived owner-> high only if a NON-owner writes; owner-write stays medium.
     const raisingWrite =
       definedInContext === null
-        ? accessors.some((a) => a.kind === 'write')
-        : accessors.some((a) => a.kind === 'write' && a.context !== definedInContext);
+        ? accessors.some((a) => a.writes.length > 0)
+        : accessors.some((a) => a.writes.length > 0 && a.context !== definedInContext);
     const severity = raisingWrite ? 'high' : 'medium';
 
     // Messaging owner: config override (messaging-only) > derived > none.
@@ -47,8 +49,21 @@ export function check(graph, config) {
     const split = contexts
       .map((c) => describe(c, accessors.filter((a) => a.context === c)))
       .join('; ');
-    const sharedCols = [...new Set(accessors.flatMap((a) => a.columns))].sort();
-    const colPhrase = sharedCols.length ? ` sharing \`${sharedCols.join('`/`')}\`` : '';
+    // The per-context split already names every column each context touches. Only
+    // call out a "sharing" clause for columns >=2 contexts touch — the genuine shared
+    // surface — and drop it when the per-context columns already imply the full set
+    // (the common single-shared-column case), so the column isn't printed twice.
+    const cols = (a) => [...a.reads, ...a.writes];
+    const touchCount = new Map();
+    for (const c of contexts) {
+      for (const col of new Set(accessors.filter((a) => a.context === c).flatMap(cols))) {
+        touchCount.set(col, (touchCount.get(col) ?? 0) + 1);
+      }
+    }
+    const sharedCols = [...touchCount].filter(([, n]) => n >= 2).map(([col]) => col).sort();
+    const allCols = [...new Set(accessors.flatMap(cols))].sort();
+    const redundant = sharedCols.length === allCols.length && sharedCols.every((c, i) => c === allCols[i]);
+    const colPhrase = sharedCols.length && !redundant ? ` sharing \`${sharedCols.join('`/`')}\`` : '';
 
     // Citation: definition site when known, else the first accessor — line numbers
     // come from the graph (runtime-derived), never hard-coded.

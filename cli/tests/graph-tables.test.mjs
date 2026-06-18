@@ -47,7 +47,32 @@ test('graph.tables: orders defined in shared infra -> null owner, two accessor c
     assert.ok(t.columns.includes('shipment_status'));
     const ctxs = new Set(t.accessors.map((a) => a.context));
     assert.deepEqual([...ctxs].sort(), ['fulfilment', 'ordering']);
-    assert.ok(t.accessors.some((a) => a.context === 'fulfilment' && a.kind === 'write'));
-    assert.ok(t.accessors.some((a) => a.context === 'ordering' && a.kind === 'read'));
+    assert.ok(t.accessors.some((a) => a.context === 'fulfilment' && a.writes.includes('shipment_status')));
+    assert.ok(t.accessors.some((a) => a.context === 'ordering' && a.reads.includes('shipment_status')));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('graph.tables: a file that both reads and writes the table keeps BOTH directions', () => {
+  // The leaked-invariant regression: read+write in one file must not collapse to a
+  // single `write` with mixed columns. reads/writes stay separate per column.
+  const dir = mkdtempSync(join(tmpdir(), 'ddd-graph-rw-'));
+  try {
+    writeFileSync(join(dir, 'ddd-council.json'), JSON.stringify({
+      contexts: { ops: { module: 'ops', paths: ['src/ops/**'], publicModules: ['api'] } },
+    }));
+    mkdirSync(join(dir, 'src/ops'), { recursive: true });
+    writeFileSync(join(dir, 'src/schema.rs'),
+      `diesel::table! { orders (id) { id -> BigInt, shipment_status -> Text } }`);
+    // one file reads `id` (a select) AND writes `shipment_status` (a .set)
+    writeFileSync(join(dir, 'src/ops/repo.rs'),
+      `use crate::schema::orders;\nfn rw(c:&mut C){\n` +
+      `  orders::table.find(1).select(orders::id).first(c);\n` +
+      `  diesel::update(orders::table.find(1)).set(orders::shipment_status.eq("S")).execute(c);\n}`);
+    const t = buildGraph(dir, loadConfig(dir)).tables.get('orders');
+    const row = t.accessors.find((a) => a.context === 'ops');
+    assert.ok(row, 'ops touches orders');
+    assert.ok(row.reads.includes('id'), `read column survives, got reads=${row.reads}`);
+    assert.ok(row.writes.includes('shipment_status'), `write column survives, got writes=${row.writes}`);
+    assert.ok(!row.reads.includes('shipment_status'), 'a written column is not also recorded as a read');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
