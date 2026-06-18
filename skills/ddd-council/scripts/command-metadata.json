@@ -41,6 +41,12 @@
       "argumentHint": "[plan-or-spec.md]",
       "mode": "vet",
       "lens": "strategic"
+    },
+    "aggregate": {
+      "description": "Name a bounded context's aggregate roots, the invariant each protects, the consistency boundary, and what is held inside vs referenced by id. Critique mode cites code; design mode proposes from intent. Lands the four root-level section-D tactical signals; writes docs/aggregate-<context-slug>-<date>.md (model + findings) that round-trips via remediate.",
+      "argumentHint": "[context] or [context/Root]",
+      "mode": "both",
+      "lens": "tactical"
     }
   }
 }

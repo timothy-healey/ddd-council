@@ -188,6 +188,7 @@ When a verb is invoked, load its reference file and follow it.
 | `boundaries` | `reference/boundaries.md` | both | Assess boundaries; name relationship patterns between contexts. |
 | `remediate` | `reference/remediate.md` | remediate | Work a critique's findings to fixes — refactor-first inline, escalate substantial additions to a plan. |
 | `vet` | `reference/vet.md` | vet | Review a proposed change (plan/spec) for DDD design soundness before it's built; cite §E smells, amend the plan. |
+| `aggregate` | `reference/aggregate.md` | both | Name a context's aggregate roots, the invariant each protects, the consistency boundary, and inside-vs-referenced; cite §D smells; round-trips via `remediate`. |
 
 Roadmap verbs (tactical: `aggregate`, `entities`, `value-objects`, `events`,
 `repositories`, …; meta: `model`, `distill`, `audit`) are added iteratively.
