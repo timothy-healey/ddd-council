@@ -148,9 +148,10 @@ so the catalog is one vocabulary across stages. A finding cites the **plan secti
 
 The inside-a-context catalog, surfaced by the tactical verbs. The four root-level
 signals land with `aggregate`; *entity/value-object misclassification* lands with
-`entities`/`value-objects`; the rest stay *roadmap* until their owning verb ships. Like
-§A/§C, these are council-only — the engine reads the import graph and can't see
-invariants or transaction scopes.
+`entities`/`value-objects`; *repository-per-entity* and *domain logic in the
+application/service layer* land with `repositories`; the rest stay *roadmap* until their
+owning verb ships. Like §A/§C, these are council-only — the engine reads the import graph
+and can't see invariants or transaction scopes.
 
 - **Anaemic domain model** — the aggregate is a bag of getters/setters and the
   behaviour that should protect its invariant lives in a service. *Cue:* a data class
@@ -187,10 +188,27 @@ invariants or transaction scopes.
   wrong — two equal values treated as distinct, or one tracked instance silently replaced
   — and invariants attach to the wrong unit. *Confirm:* does the business track this thing
   individually (entity), or care only about its value (value object)?
+- **Repository-per-entity** — a repository keyed to a *child* entity or value object
+  instead of the aggregate root, or direct persistence of inside-composition that bypasses
+  the root. *Cue:* a `*Repository` / `save(child)` for a type the aggregate's composition
+  holds **inside** a root; an aggregate persisted as loose fragments rather than loaded and
+  saved whole. *Why:* the root stops being the unit of consistency — children are mutated
+  and persisted behind its back, so its invariant can't hold (ties to *leaked invariant*).
+  *Confirm:* is this child really its own aggregate root, or should its access fold into
+  the root's repository?
+- **Domain logic in the application/service layer (persistence seam)** — a domain decision
+  encoded in application-service orchestration or query logic rather than on the domain
+  model. *Cue:* a service that fetches a root, mutates it per a business rule, and saves,
+  with the rule living in the service; a query embedding a domain decision (eligibility,
+  status filtering, selection rules) that should be a named operation on the root.
+  *Discriminator vs* **anaemic domain model:** if the smell is a data-class root (a public
+  setter per field) paired with a `*Service`/`*Manager`, that is anaemic-model, not this;
+  this signal needs a query- or orchestration-embedded rule. Where the same code trips
+  both, cite anaemic-model. *Why:* the domain's behaviour and rules are invisible in the
+  model and unprotected — any caller can skip them. *Confirm:* should the rule move onto the
+  root / become a named operation, or is this legitimate application-level orchestration?
 
-*Still roadmap (land with later verbs):* repository-per-entity instead of
-per-aggregate-root and domain logic in the application/service layer (`repositories`),
-and missing domain events (`events`).
+*Still roadmap (land with later verbs):* missing domain events (`events`).
 
 ---
 
