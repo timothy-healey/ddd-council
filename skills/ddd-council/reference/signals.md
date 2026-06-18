@@ -5,8 +5,8 @@ trace to a signal here, cited in code.*
 
 This is the concrete answer to "what does the room actually look for?" It is also
 the **rule spec for the `detect` engine** — each signal is written so it can be
-checked mechanically. §B is mechanized today; §A and §C are council-only until
-they are.
+checked mechanically. §B is mechanized today; §A, §C, and §D are council-only
+until they are.
 
 **Council ↔ Detector is a partnership.** The council authors this spec (upstream
 of the engine here) *and* consumes the engine's findings (the engine is upstream
@@ -144,14 +144,44 @@ so the catalog is one vocabulary across stages. A finding cites the **plan secti
 
 ---
 
-## D. Tactical signals — *roadmap*
+## D. Tactical signals (inside one aggregate)
 
-Added when the tactical verbs land (`aggregate`, `entities`, `value-objects`,
-`events`, `repositories`). Will cover: anaemic domain model, god aggregate,
-transaction spanning aggregates (and aggregate split across transactions),
-entity/value-object misclassification, leaked invariant, repository-per-entity
-(instead of per-aggregate root), domain logic in the application/service layer,
-and missing domain events.
+The inside-a-context catalog, surfaced by the tactical verbs. The four root-level
+signals below land with `aggregate`; the rest stay *roadmap* until their owning verb
+ships. Like §A/§C, these are council-only — the engine reads the import graph and
+can't see invariants or transaction scopes.
+
+- **Anaemic domain model** — the aggregate is a bag of getters/setters and the
+  behaviour that should protect its invariant lives in a service. *Cue:* a data class
+  with a public setter for every field, paired with a `*Service`/`*Manager` that
+  mutates it. *Why:* the invariant has no home; any caller can put the aggregate in an
+  illegal state. *Confirm:* should the behaviour move onto the root, or is the model
+  deliberately a DTO at this layer?
+- **God aggregate** — one root pulls in too much; the consistency boundary is far wider
+  than the invariant needs. *Cue:* a root holding many unrelated child collections; a
+  single load/save dragging in a large object graph; one transaction touching much of
+  the schema. *Why:* contention and coupling — the whole graph locks and changes
+  together for a rule that governs a fraction of it. *Confirm:* which children share the
+  *true* invariant; what can be referenced by id instead of held inside?
+- **Transaction spanning aggregates** — one transaction mutates two roots, or one
+  aggregate's invariant is split across two transactions. *Cue:* a transaction scope (or
+  unit of work) writing two roots' tables; a save of root A inside a loop over root B.
+  *Why:* the aggregate is the unit of consistency — a transaction wider than one root
+  couples their lifecycles; one narrower leaves an invariant half-enforced. *Confirm:*
+  should the boundary move, or should the cross-root change become an event /
+  eventual-consistency step?
+- **Leaked invariant** — a rule the aggregate exists to protect is enforced (or left
+  unenforced) outside it. *Cue:* the **gap** found while collecting an invariant's
+  enforcement sites — a mutation path that changes state without re-checking the rule (a
+  public setter, a raw SQL update, a service that bypasses the root). *Why:* the
+  aggregate can't guarantee the invariant it's named for; the rule will eventually be
+  violated on the unguarded path. *Confirm:* is the missing guard an oversight, or does
+  the rule actually live in another context?
+
+*Still roadmap (land with later verbs):* entity/value-object misclassification and
+primitive obsession at the boundary (`entities`/`value-objects`), repository-per-entity
+instead of per-aggregate-root and domain logic in the application/service layer
+(`repositories`), and missing domain events (`events`).
 
 ---
 
