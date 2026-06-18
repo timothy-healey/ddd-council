@@ -8,18 +8,24 @@ verbs are the product's core promise; the engine tracks are enhancements that fo
 - **Strategic verbs** — `init`, `map`, `critique`, `language`, `boundaries`.
 - **Review & remediate** — `vet` (pre-build review of a plan/spec), `remediate`
   (refactor-first fixes that round-trip into the critique artifact).
+- **Tactical keystone** — `aggregate` (Phase 1.1): names a context's aggregate roots,
+  the invariant each protects (statement → enforcement sites → gaps), the consistency
+  boundary, and inside-vs-referenced; model + findings artifact round-trips via
+  `remediate`. Both-mode, tactical lens.
 - **Refactor-first shared law** — every verb prefers reshaping existing code over
   adding new.
 - **Detector (Rust)** — `leaky-boundary`, `circular-dependency`, `god-module`,
   `cross-context-coupling` from the import graph; `init` generates its
   `ddd-council.json`.
 - **Signals catalog** — §A context-boundary, §B strategic anti-patterns, §C language
-  smells, §E design-stage smells (for `vet`). §D (tactical) is stubbed.
+  smells, §E design-stage smells (for `vet`). §D (tactical) has its four root-level
+  signals filled (anaemic model, god aggregate, transaction spanning aggregates, leaked
+  invariant); the rest are stubbed for later tactical verbs.
 
 ## Sequencing at a glance
 
 ```
-Phase 1  Tactical spine (Track A)      aggregate → entities/value-objects → repositories → events
+Phase 1  Tactical spine (Track A)      aggregate ✅ → entities/value-objects → repositories → events
 Phase 2  Engine grounding (Tracks B,C) schema-aware detection ; multi-language grammars
 Phase 3  Meta verbs (Track D)          model ; distill ; audit
 ```
@@ -38,18 +44,19 @@ needs.
 
 Build in dependency / teaching order:
 
-### 1. `aggregate` — the keystone
+### 1. `aggregate` — the keystone ✅ *shipped*
 - **Scope:** identify aggregate roots and the **invariant each protects**; the
-  consistency boundary; what's inside vs referenced by id. Lands the first §D signals:
+  consistency boundary; what's inside vs referenced by id. Landed the first §D signals:
   *anaemic domain model, god aggregate, transaction spanning aggregates, leaked
   invariant*.
-- **Value:** the root concept everything tactical hangs off; "every aggregate names
-  what it protects" is already a charter law with no verb to exercise it.
-- **Depends on:** strategic verbs (contexts must exist first).
-- **Size:** 1 spec. The §D signals are part of it.
-- **Open questions:** how much to infer aggregate roots from code vs ask the operator;
-  how `aggregate` cites an invariant that lives across several methods; tactical lens
-  default (narrow/deep).
+- **As built:** both-mode (critique default, design from intent), tactical lens. Target
+  `aggregate <context>` (or `<context>/<Root>` to zoom). Artifact is *model + findings*
+  (`docs/aggregate-<context-slug>-<date>.md`) that round-trips via `remediate`. Invariant
+  represented as *statement → enforcement sites → gaps* — the gap is the leaked-invariant
+  finding. Seam: `aggregate` draws the boundary; `entities`/`value-objects` sorts the
+  insides.
+- **Spec/plan:** `docs/superpowers/specs/2026-06-18-aggregate-verb-design.md`,
+  `docs/superpowers/plans/2026-06-18-aggregate-verb.md`.
 
 ### 2. `entities` & `value-objects`
 - **Scope:** classify the types an aggregate is composed of — identity (entity) vs
@@ -125,8 +132,9 @@ Independent of Phase 1; advances the "engine finds, council interprets" half.
 
 ## Next action
 
-Brainstorm **`aggregate`** (Phase 1.1) into a spec — the keystone that unlocks the
-rest of the tactical track.
+Brainstorm **`entities` & `value-objects`** (Phase 1.2) into a spec — classify the types
+*within* an aggregate (identity vs value), now that `aggregate` names the composition.
+Open: one verb or two; how to surface a value-object extraction as a refactor.
 
 ## Note
 
