@@ -192,6 +192,7 @@ When a verb is invoked, load its reference file and follow it.
 | `entities` | `reference/entities-value-objects.md` | both | Classify an aggregate's composition as entities vs value objects (identity vs value); cite §D misclassification + §C primitive obsession; round-trips via `remediate`. |
 | `value-objects` | `reference/entities-value-objects.md` | both | Alias of `entities` — the same playbook, entered from the value-object side. |
 | `repositories` | `reference/repositories.md` | both | Assess a context's persistence: one repository per aggregate root dealing in whole aggregates; cite §D repository-per-entity + domain-logic-in-the-service-layer; round-trips via `remediate`. |
+| `events` | `reference/events.md` | both | Assess the domain events an aggregate publishes (named business moments per state transition); cite §D missing-domain-events + §C CRUD-masking; round-trips via `remediate`. |
 
-Roadmap verbs (tactical: `events`, …; meta: `model`, `distill`, `audit`) are added
-iteratively.
+The tactical spine (`aggregate`, `entities`/`value-objects`, `repositories`, `events`) is
+complete. Roadmap verbs (meta: `model`, `distill`, `audit`) are added iteratively.

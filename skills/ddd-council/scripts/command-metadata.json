@@ -65,6 +65,12 @@
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
       "lens": "tactical"
+    },
+    "events": {
+      "description": "Assess the domain events a bounded context's aggregates publish: the named business moments (Shipped, Cancelled) that signal a meaningful state transition. Critique mode cites code; design mode proposes the events that should exist from intent. Takes roots from the aggregate artifact when present, derives state transitions from code. Lands the section-D missing-domain-events signal and cites the section-C CRUD-masking-intent smell (discriminator: no event emitted is section-D; misnamed operation is section-C). Writes docs/events-<context-slug>-<date>.md (model + findings) that round-trips via remediate. Council-only and tactical; cross-context integration events are the boundaries verb's job.",
+      "argumentHint": "[context] or [context/Root]",
+      "mode": "both",
+      "lens": "tactical"
     }
   }
 }
