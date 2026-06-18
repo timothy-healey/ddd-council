@@ -51,7 +51,10 @@ cluster modules into contexts.
   queries/ORM target one table; a model imported across a context line. *Why:* the
   highest-coupling relationship, created by accident — a change in one silently
   breaks the other. *Confirm:* deliberate shared kernel, or should it split with an
-  owner + a published interface?
+  owner + a published interface? *Engine:* the `detect` engine emits this as
+  `signalId: accidental-shared-kernel` — a diesel table ≥2 contexts touch that none
+  owns, severity high when a non-owner writes it (declare a deliberate kernel with
+  `tables.<table>.sharedKernel = true`).
 - **Leaky boundary** — a module reaches into another context's *internals* rather
   than its public surface. *Cue:* deep imports (`billing/internal/...`), calling
   private/helper functions across the line, depending on another context's DB rows.
