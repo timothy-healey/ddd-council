@@ -47,6 +47,18 @@
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
       "lens": "tactical"
+    },
+    "entities": {
+      "description": "Classify the types within a bounded context's aggregates as entities (identity + lifecycle) or value objects (defined by value). Critique mode cites code; design mode proposes from intent. Prefers the aggregate artifact's composition list when present, else derives it. Lands the section-D entity/value-object misclassification signal and surfaces the section-C primitive-obsession smell; writes docs/entities-<context-slug>-<date>.md (model + findings) that round-trips via remediate. Alias of value-objects — one playbook.",
+      "argumentHint": "[context] or [context/Root]",
+      "mode": "both",
+      "lens": "tactical"
+    },
+    "value-objects": {
+      "description": "Classify the types within a bounded context's aggregates as entities (identity + lifecycle) or value objects (defined by value). Critique mode cites code; design mode proposes from intent. Prefers the aggregate artifact's composition list when present, else derives it. Lands the section-D entity/value-object misclassification signal and surfaces the section-C primitive-obsession smell; writes docs/entities-<context-slug>-<date>.md (model + findings) that round-trips via remediate. Alias of entities — one playbook.",
+      "argumentHint": "[context] or [context/Root]",
+      "mode": "both",
+      "lens": "tactical"
     }
   }
 }

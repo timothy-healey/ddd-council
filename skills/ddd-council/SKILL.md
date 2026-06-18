@@ -189,6 +189,8 @@ When a verb is invoked, load its reference file and follow it.
 | `remediate` | `reference/remediate.md` | remediate | Work a critique's findings to fixes — refactor-first inline, escalate substantial additions to a plan. |
 | `vet` | `reference/vet.md` | vet | Review a proposed change (plan/spec) for DDD design soundness before it's built; cite §E smells, amend the plan. |
 | `aggregate` | `reference/aggregate.md` | both | Name a context's aggregate roots, the invariant each protects, the consistency boundary, and inside-vs-referenced; cite §D smells; round-trips via `remediate`. |
+| `entities` | `reference/entities-value-objects.md` | both | Classify an aggregate's composition as entities vs value objects (identity vs value); cite §D misclassification + §C primitive obsession; round-trips via `remediate`. |
+| `value-objects` | `reference/entities-value-objects.md` | both | Alias of `entities` — the same playbook, entered from the value-object side. |
 
-Roadmap verbs (tactical: `aggregate`, `entities`, `value-objects`, `events`,
-`repositories`, …; meta: `model`, `distill`, `audit`) are added iteratively.
+Roadmap verbs (tactical: `events`, `repositories`, …; meta: `model`, `distill`,
+`audit`) are added iteratively.
