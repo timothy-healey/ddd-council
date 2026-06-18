@@ -25,7 +25,11 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
 - **Context configuration** (candidate seam) — `ddd-council.json` ⇄ `DOMAIN.md`,
   and the shared **Finding** shape that both halves emit. Looks like the
   published language / shared kernel between Council and Detector; worth naming
-  explicitly when `boundaries` runs.
+  explicitly when `boundaries` runs. Track B adds the first named terms here:
+  `owner` (config override, messaging-only) and `sharedKernel` (declared-kernel
+  suppression, honoured Detector-side in v1; Council-side honouring is a named
+  follow-up). `owner` and the engine-derived `definedInContext` are one concept —
+  the table's owning context — in two provenances. See `docs/ubiquitous-language.md`.
 
 ## Domain experts
 _Seeded from general knowledge; refine the background/vocabulary as the operator
