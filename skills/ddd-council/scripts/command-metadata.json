@@ -59,6 +59,12 @@
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
       "lens": "tactical"
+    },
+    "repositories": {
+      "description": "Assess how a bounded context's aggregates persist: one repository per aggregate root, dealing in whole aggregates — not one per entity, and not with domain logic leaked into the application/service layer. Critique mode cites code; design mode proposes from intent. Prefers the aggregate artifact's roots and composition when present, else derives them. Lands the section-D repository-per-entity signal and the new section-D domain-logic-in-the-application/service-layer (persistence seam) signal; writes docs/repositories-<context-slug>-<date>.md (model + findings) that round-trips via remediate. Council-only; reads persistence at DDD altitude, not SQL correctness or performance.",
+      "argumentHint": "[context] or [context/Root]",
+      "mode": "both",
+      "lens": "tactical"
     }
   }
 }
