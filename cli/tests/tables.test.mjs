@@ -120,3 +120,33 @@ test('parseTableAccesses: degrades (never throws) on garbage', () => {
   assert.doesNotThrow(() => parseTableAccesses('fn ( {{{ orders:: '));
   assert.ok(Array.isArray(parseTableAccesses('let x = 1;')));
 });
+
+import { loadConfig } from '../src/config.mjs';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join as pjoin } from 'node:path';
+
+function tmpRepo(json) {
+  const dir = mkdtempSync(pjoin(tmpdir(), 'ddd-tables-'));
+  writeFileSync(pjoin(dir, 'ddd-council.json'), JSON.stringify(json));
+  return dir;
+}
+
+test('loadConfig: tables defaults to {} when absent', () => {
+  const dir = tmpRepo({ contexts: { a: { paths: ['a/**'] } } });
+  try {
+    assert.deepEqual(loadConfig(dir).tables, {});
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('loadConfig: surfaces an optional tables block verbatim', () => {
+  const dir = tmpRepo({
+    contexts: { a: { paths: ['a/**'] } },
+    tables: { orders: { owner: 'a' }, audit_log: { sharedKernel: true } },
+  });
+  try {
+    const cfg = loadConfig(dir);
+    assert.equal(cfg.tables.orders.owner, 'a');
+    assert.equal(cfg.tables.audit_log.sharedKernel, true);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
