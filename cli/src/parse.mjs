@@ -165,3 +165,81 @@ export function parseTableDefs(source) {
   })(tree.rootNode);
   return out;
 }
+
+// The ONE home of the write-verb vocabulary (spec invariant). The rule consumes
+// `kind` only and never re-derives write-ness from the verb.
+const WRITE_CALLS = new Set(['insert_into', 'update', 'delete']);
+const WRITE_METHODS = new Set(['set']);
+
+// Classify one scoped access by its nearest enclosing diesel call. A `.set(...)`
+// method-call ancestor, or an `insert_into`/`update`/`delete` path-call ancestor,
+// makes it a write; otherwise read (the safe default).
+function accessKind(node) {
+  for (let cur = node.parent; cur; cur = cur.parent) {
+    if (cur.type === 'call_expression') {
+      const fn = cur.childForFieldName('function');
+      if (fn) {
+        if (fn.type === 'field_expression') {
+          const field = fn.childForFieldName('field');
+          if (field && WRITE_METHODS.has(field.text)) return 'write';
+        } else {
+          const segs = flattenPath(fn);
+          const last = segs[segs.length - 1];
+          if (WRITE_CALLS.has(last)) return 'write';
+        }
+      }
+    }
+  }
+  return 'read';
+}
+
+/**
+ * Collect diesel table accesses. Two forms:
+ *   (a) `use crate::schema::{a,b}` imports  -> seed the universe (viaScoped:false)
+ *   (b) scoped expression paths `<t>::table` / `<t>::<col>` -> the precise touch
+ *       (viaScoped:true), each classified read/write.
+ * The CALLER filters `table` against the discovered table universe. Tolerant: never throws.
+ * @returns {Array<{ table, column: string|null, kind: 'read'|'write', line: number, viaScoped: boolean }>}
+ */
+export function parseTableAccesses(source) {
+  const out = [];
+  // form (a): reuse parseRust's use-walk for `crate::schema::<t>` / `schema::<t>`.
+  try {
+    for (const u of parseRust(source).uses) {
+      const s = u.segments;
+      const i = s.indexOf('schema');
+      if (i !== -1 && s[i + 1] && s[i + 1] !== '*') {
+        out.push({ table: s[i + 1], column: null, kind: 'read', line: u.line, viaScoped: false });
+      }
+    }
+  } catch { /* degrade */ }
+  // form (b): scoped_identifier whose path is a single identifier (the table head).
+  let tree;
+  try {
+    tree = parser.parse(source);
+  } catch {
+    return out;
+  }
+  (function walk(node) {
+    if (node.type === 'scoped_identifier') {
+      try {
+        const path = node.childForFieldName('path');
+        const name = node.childForFieldName('name');
+        if (path && path.type === 'identifier' && name) {
+          // `<t>::table` carries no real column; `<t>::<col>` does.
+          const column = name.text === 'table' ? null : name.text;
+          out.push({
+            table: path.text,
+            column,
+            kind: accessKind(node),
+            line: node.startPosition.row + 1,
+            viaScoped: true,
+          });
+        }
+      } catch { /* skip this path */ }
+      return; // a scoped_identifier's segments are leaves; no nested table path
+    }
+    for (let i = 0; i < node.childCount; i++) walk(node.child(i));
+  })(tree.rootNode);
+  return out;
+}
