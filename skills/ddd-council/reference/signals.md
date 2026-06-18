@@ -149,9 +149,10 @@ so the catalog is one vocabulary across stages. A finding cites the **plan secti
 The inside-a-context catalog, surfaced by the tactical verbs. The four root-level
 signals land with `aggregate`; *entity/value-object misclassification* lands with
 `entities`/`value-objects`; *repository-per-entity* and *domain logic in the
-application/service layer* land with `repositories`; the rest stay *roadmap* until their
-owning verb ships. Like §A/§C, these are council-only — the engine reads the import graph
-and can't see invariants or transaction scopes.
+application/service layer* land with `repositories`; *missing domain events* lands with
+`events`. The catalog is complete — every §D signal has an owning verb. Like §A/§C, these
+are council-only — the engine reads the import graph and can't see invariants or
+transaction scopes.
 
 - **Anaemic domain model** — the aggregate is a bag of getters/setters and the
   behaviour that should protect its invariant lives in a service. *Cue:* a data class
@@ -207,8 +208,16 @@ and can't see invariants or transaction scopes.
   both, cite anaemic-model. *Why:* the domain's behaviour and rules are invisible in the
   model and unprotected — any caller can skip them. *Confirm:* should the rule move onto the
   root / become a named operation, or is this legitimate application-level orchestration?
-
-*Still roadmap (land with later verbs):* missing domain events (`events`).
+- **Missing domain events** — a domain-significant state transition that emits no event;
+  the business moment is invisible, so nothing downstream can react to it. *Cue:* an
+  aggregate state change (a status field set, a lifecycle step) with no event raised at the
+  mutation site. *Discriminator vs* **§C CRUD masking intent:** §C fires when a named
+  operation exists but is misnamed (the event is there, wearing a CRUD name like
+  `updateStatus`); this §D signal fires when **no event is emitted at all**. Where one CRUD
+  call is both, cite both. *Why:* the domain's real behaviour is silent — integrations, read
+  models, and side effects can't hang off a moment that was never announced. *Confirm:* is
+  this transition a business moment other parts of the system should know about, or an
+  internal step with no observers?
 
 ---
 
