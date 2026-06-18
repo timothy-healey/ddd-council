@@ -2,8 +2,9 @@ import * as leakyBoundary from './leaky-boundary.mjs';
 import * as circularDependency from './circular-dependency.mjs';
 import * as godModule from './god-module.mjs';
 import * as crossContextCoupling from './cross-context-coupling.mjs';
+import * as accidentalSharedKernel from './accidental-shared-kernel.mjs';
 
-export const RULES = [leakyBoundary, circularDependency, godModule, crossContextCoupling];
+export const RULES = [leakyBoundary, circularDependency, godModule, crossContextCoupling, accidentalSharedKernel];
 
 const SEVERITY_RANK = { high: 0, medium: 1, low: 2 };
 

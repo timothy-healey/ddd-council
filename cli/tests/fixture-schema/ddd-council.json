@@ -1,0 +1,7 @@
+{
+  "contexts": {
+    "ordering":   { "module": "ordering",   "paths": ["src/ordering/**"],   "publicModules": ["api"] },
+    "fulfilment": { "module": "fulfilment", "paths": ["src/fulfilment/**"], "publicModules": ["api"] },
+    "inventory":  { "module": "inventory",  "paths": ["src/inventory/**"],  "publicModules": ["api"] }
+  }
+}
