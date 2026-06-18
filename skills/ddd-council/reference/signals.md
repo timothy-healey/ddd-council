@@ -147,9 +147,10 @@ so the catalog is one vocabulary across stages. A finding cites the **plan secti
 ## D. Tactical signals (inside one aggregate)
 
 The inside-a-context catalog, surfaced by the tactical verbs. The four root-level
-signals below land with `aggregate`; the rest stay *roadmap* until their owning verb
-ships. Like §A/§C, these are council-only — the engine reads the import graph and
-can't see invariants or transaction scopes.
+signals land with `aggregate`; *entity/value-object misclassification* lands with
+`entities`/`value-objects`; the rest stay *roadmap* until their owning verb ships. Like
+§A/§C, these are council-only — the engine reads the import graph and can't see
+invariants or transaction scopes.
 
 - **Anaemic domain model** — the aggregate is a bag of getters/setters and the
   behaviour that should protect its invariant lives in a service. *Cue:* a data class
@@ -177,11 +178,19 @@ can't see invariants or transaction scopes.
   aggregate can't guarantee the invariant it's named for; the rule will eventually be
   violated on the unguarded path. *Confirm:* is the missing guard an oversight, or does
   the rule actually live in another context?
+- **Entity/value-object misclassification** — a type sits on the wrong side of the
+  identity-vs-value axis: an entity with no meaningful identity (it's defined wholly by
+  its attributes → really a value object), or a value object carrying an id and a mutable
+  lifecycle it doesn't need. *Cue:* an id field never used for lookup or equality; a
+  "value" type mutated in place across call sites; equality/`hashCode` over all fields on
+  a type the system tracks individually. *Why:* equality and lifecycle semantics come out
+  wrong — two equal values treated as distinct, or one tracked instance silently replaced
+  — and invariants attach to the wrong unit. *Confirm:* does the business track this thing
+  individually (entity), or care only about its value (value object)?
 
-*Still roadmap (land with later verbs):* entity/value-object misclassification and
-primitive obsession at the boundary (`entities`/`value-objects`), repository-per-entity
-instead of per-aggregate-root and domain logic in the application/service layer
-(`repositories`), and missing domain events (`events`).
+*Still roadmap (land with later verbs):* repository-per-entity instead of
+per-aggregate-root and domain logic in the application/service layer (`repositories`),
+and missing domain events (`events`).
 
 ---
 
