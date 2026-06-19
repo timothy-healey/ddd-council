@@ -80,7 +80,7 @@ function runCell(cell, model, runs) {
     precision: { median: median(ok.map((t) => t.precision)) },
     tokensOut: { median: median(ok.map((t) => t.tokens.output)), min: Math.min(...ok.map((t) => t.tokens.output)), max: Math.max(...ok.map((t) => t.tokens.output)) },
     tokensIn: { median: median(ok.map((t) => t.tokens.input)) },
-    missed: ok[0].missed,
+    missed: [...new Set(ok.flatMap((t) => t.missed))], // union across trials, not just trial 0
   };
 }
 
@@ -92,7 +92,8 @@ function gitSha() {
 function main() {
   const argv = process.argv.slice(2);
   const model = (argv[argv.indexOf('--model') + 1] && argv.includes('--model')) ? argv[argv.indexOf('--model') + 1] : '';
-  const runs = argv.includes('--runs') ? Number(argv[argv.indexOf('--runs') + 1]) : 3;
+  const runsRaw = argv.includes('--runs') ? Number(argv[argv.indexOf('--runs') + 1]) : 3;
+  const runs = Number.isFinite(runsRaw) && runsRaw > 0 ? runsRaw : 3; // guard --runs NaN/0
 
   // Surface CELLS/PLANTED drift before spending tokens (plan-vet F3).
   try {
