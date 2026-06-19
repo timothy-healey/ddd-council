@@ -28,8 +28,12 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
   published language / shared kernel between Council and Detector; worth naming
   explicitly when `boundaries` runs. Track B adds the first named terms here:
   `owner` (config override, messaging-only) and `sharedKernel` (declared-kernel
-  suppression, honoured Detector-side in v1; Council-side honouring is a named
-  follow-up). `owner` and the engine-derived `definedInContext` are one concept —
+  suppression). `sharedKernel` is now honoured **both Detector-side** (suppresses the
+  rule) **and Council-side** (`critique` names the declared Shared Kernel on the map;
+  `model`/`audit` inherit via the artifacts — the named follow-up is closed). `owner`
+  is messaging-side in the engine and, council-side, attributes the table and names a
+  Customer-Supplier relationship (a non-owner write is a customer-supplier violation).
+  `owner` and the engine-derived `definedInContext` are one concept —
   the table's owning context — in two provenances (carried inline here, not in the
   gitignored `docs/`).
   Track C publishes the **language-module interface** to this seam — the contract
