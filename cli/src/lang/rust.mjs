@@ -2,6 +2,8 @@
 // drop in another tree-sitter grammar later and the rest of the engine is polyglot.
 import Parser from 'tree-sitter';
 import Rust from 'tree-sitter-rust';
+import { contextForModule } from '../config.mjs';
+import { walkTree } from './walk.mjs';
 
 const parser = new Parser();
 parser.setLanguage(Rust);
@@ -72,17 +74,6 @@ function expandUseTree(node, prefix = []) {
   }
 }
 
-// The ONE traversal seam. Pre-order depth-first over a parsed tree; `visit`
-// returns true to prune (don't descend into the matched node's children). Every
-// consumer below is just a node-type predicate + a collector over this one walk —
-// no consumer re-implements the descent (was three near-identical copies).
-function walkTree(tree, visit) {
-  (function rec(node) {
-    if (visit(node)) return; // pruned
-    for (let i = 0; i < node.childCount; i++) rec(node.child(i));
-  })(tree.rootNode);
-}
-
 // Collect the imported use-paths from an already-parsed tree.
 function collectUses(tree) {
   const uses = [];
@@ -102,10 +93,10 @@ function collectUses(tree) {
 
 /**
  * Parse one Rust source file.
- * @returns {{ uses: Array<{ segments: string[], line: number }> }}
+ * @returns {{ imports: Array<{ segments: string[], line: number }> }}
  */
 export function parseRust(source) {
-  return { uses: collectUses(parser.parse(source)) };
+  return { imports: collectUses(parser.parse(source)) };
 }
 
 // --- Track B: diesel schema layer (additive, same grammar, same seam) -------
@@ -263,7 +254,7 @@ function collectScopedTouches(tree) {
           column,
           kind: accessKind(node),
           line: node.startPosition.row + 1,
-          viaScoped: true,
+          isTouch: true,
         });
       }
     } catch { /* skip this path */ }
@@ -279,7 +270,7 @@ function importedTables(uses) {
     const s = u.segments;
     const i = s.indexOf('schema');
     if (i !== -1 && s[i + 1] && s[i + 1] !== '*') {
-      out.push({ table: s[i + 1], column: null, kind: 'read', line: u.line, viaScoped: false });
+      out.push({ table: s[i + 1], column: null, kind: 'read', line: u.line, isTouch: false });
     }
   }
   return out;
@@ -289,18 +280,18 @@ function importedTables(uses) {
  * Parse one Rust source file ONCE and run every collector over the single tree.
  * The grammar is tokenized exactly once per file (the hot path of the only stage
  * that reads every file). Tolerant: an unparseable source yields empty collections.
- * @returns {{ uses, tableDefs, tableAccesses }}
+ * @returns {{ imports, tableDefs, tableAccesses }}
  */
 export function parseFile(source) {
   let tree;
   try {
     tree = parser.parse(source);
   } catch {
-    return { uses: [], tableDefs: [], tableAccesses: [] };
+    return { imports: [], tableDefs: [], tableAccesses: [] };
   }
   const uses = collectUses(tree);
   return {
-    uses,
+    imports: uses,
     tableDefs: collectTableDefs(tree),
     // form (a) imports seed the universe; form (b) scoped paths are the precise touch.
     tableAccesses: [...importedTables(uses), ...collectScopedTouches(tree)],
@@ -309,13 +300,42 @@ export function parseFile(source) {
 
 /**
  * Collect diesel table accesses. Two forms:
- *   (a) `use crate::schema::{a,b}` imports  -> seed the universe (viaScoped:false)
+ *   (a) `use crate::schema::{a,b}` imports  -> seed the universe (isTouch:false)
  *   (b) scoped expression paths `<t>::table` / `<t>::<col>` -> the precise touch
- *       (viaScoped:true), each classified read/write. Both the 2-segment
+ *       (isTouch:true), each classified read/write. Both the 2-segment
  *       (`orders::table`) and fully-qualified (`crate::schema::orders::table`) shapes.
  * The CALLER filters `table` against the discovered table universe. Tolerant: never throws.
- * @returns {Array<{ table, column: string|null, kind: 'read'|'write', line: number, viaScoped: boolean }>}
+ * @returns {Array<{ table, column: string|null, kind: 'read'|'write', line: number, isTouch: boolean }>}
  */
 export function parseTableAccesses(source) {
   return parseFile(source).tableAccesses;
 }
+
+// Strip leading crate/self/super; return null if the path is intra-context relative.
+function normalizeLeading(segments) {
+  let segs = [...segments];
+  if (segs[0] === 'crate') segs = segs.slice(1);
+  if (segs[0] === 'self' || segs[0] === 'super') return null; // relative -> same context
+  return segs;
+}
+
+export default {
+  extensions: ['.rs'],
+  parseFile,
+  // record = { segments: string[], line }. Resolve a Rust use-path to a cross-context edge,
+  // or null for std/external crate / intra-context.
+  resolveImport({ segments }, { fromContext, config }) {
+    const segs = normalizeLeading(segments);
+    if (!segs || segs.length === 0) return null;
+    const toContext = contextForModule(segs[0], config);
+    if (!toContext || toContext === fromContext) return null;
+    const rest = segs.slice(1);
+    const restModule = rest.length >= 1 ? rest[0] : null;
+    const throughPublic = restModule && config.contexts[toContext].publicModules.includes(restModule);
+    // moduleKey: the neutral hub key god-module groups on. `segs[0]::restModule` reproduces
+    // today's `ref.path.split('::').slice(0,2)` verbatim (e.g. `billing::api`), so the Rust
+    // detect.test `/billing::api/` assertion is preserved.
+    const moduleKey = restModule ? `${segs[0]}::${restModule}` : segs[0];
+    return { toContext, restModule, isLeak: rest.length >= 1 && !throughPublic, displayPath: segs.join('::'), moduleKey };
+  },
+};

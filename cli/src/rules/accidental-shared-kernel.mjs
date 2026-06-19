@@ -11,9 +11,11 @@ export const id = 'accidental-shared-kernel';
 function describe(context, rows) {
   const writes = [...new Set(rows.flatMap((r) => r.writes))];
   const reads = [...new Set(rows.flatMap((r) => r.reads))];
+  const wrote = rows.some((r) => r.hasWrite);
+  const read = rows.some((r) => r.hasRead);
   const cols = [...new Set([...writes, ...reads])].sort();
   const colStr = cols.length ? ` \`${cols.join('`/`')}\`` : '';
-  const verb = reads.length && writes.length ? 'reads/writes' : writes.length ? 'writes' : 'reads';
+  const verb = read && wrote ? 'reads/writes' : wrote ? 'writes' : 'reads';
   return `${context} ${verb}${colStr}`;
 }
 
@@ -38,8 +40,8 @@ export function check(graph, config) {
     //   derived owner-> high only if a NON-owner writes; owner-write stays medium.
     const raisingWrite =
       definedInContext === null
-        ? accessors.some((a) => a.writes.length > 0)
-        : accessors.some((a) => a.writes.length > 0 && a.context !== definedInContext);
+        ? accessors.some((a) => a.hasWrite)
+        : accessors.some((a) => a.hasWrite && a.context !== definedInContext);
     const severity = raisingWrite ? 'high' : 'medium';
 
     // Messaging owner: config override (messaging-only) > derived > none.

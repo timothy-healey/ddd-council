@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseTableDefs } from '../src/parse.mjs';
+import { parseTableDefs } from '../src/lang/rust.mjs';
 
 const SCHEMA = `//! diesel schema.
 diesel::table! {
@@ -56,7 +56,7 @@ test('parseTableDefs: a non-table macro is ignored', () => {
   assert.deepEqual(parseTableDefs('println!("hello {}", x); vec![1,2,3];'), []);
 });
 
-import { parseTableAccesses } from '../src/parse.mjs';
+import { parseTableAccesses } from '../src/lang/rust.mjs';
 
 const WRITE_SRC = `use diesel::prelude::*;
 use crate::schema::orders;
@@ -86,33 +86,33 @@ test('parseTableAccesses: classifies a diesel update/.set as a write', () => {
   assert.ok(w, 'found shipment_status access');
   assert.equal(w.table, 'orders');
   assert.equal(w.kind, 'write');
-  assert.equal(w.viaScoped, true);
+  assert.equal(w.isTouch, true);
   assert.ok(w.line >= 1, `cited at a real line, got ${w.line}`);
   // form (a) import is also seeded
-  assert.ok(acc.some((a) => a.table === 'orders' && a.viaScoped === false));
+  assert.ok(acc.some((a) => a.table === 'orders' && a.isTouch === false));
 });
 
 test('parseTableAccesses: classifies a select/find/first as a read', () => {
   const acc = parseTableAccesses(READ_SRC);
-  const r = acc.find((a) => a.column === 'shipment_status' && a.viaScoped);
+  const r = acc.find((a) => a.column === 'shipment_status' && a.isTouch);
   assert.ok(r, 'found read of shipment_status');
   assert.equal(r.kind, 'read');
 });
 
 test('parseTableAccesses: classifies insert_into as a write', () => {
   const acc = parseTableAccesses(INSERT_SRC);
-  assert.ok(acc.some((a) => a.table === 'line_items' && a.kind === 'write' && a.viaScoped));
+  assert.ok(acc.some((a) => a.table === 'line_items' && a.kind === 'write' && a.isTouch));
 });
 
 test('parseTableAccesses: imported-but-unused table records no scoped touch (form b decides)', () => {
   const src = `use crate::schema::{orders, unused};
     fn q(c: &mut C) { orders::table.find(1).select(orders::id).load(c) }`;
   const acc = parseTableAccesses(src);
-  const scopedTouches = new Set(acc.filter((a) => a.viaScoped).map((a) => a.table));
+  const scopedTouches = new Set(acc.filter((a) => a.isTouch).map((a) => a.table));
   assert.ok(scopedTouches.has('orders'), 'orders is actually queried');
   assert.ok(!scopedTouches.has('unused'), 'unused was imported but never queried');
-  // the import is still seeded (viaScoped:false) for the universe
-  assert.ok(acc.some((a) => a.table === 'unused' && a.viaScoped === false));
+  // the import is still seeded (isTouch:false) for the universe
+  assert.ok(acc.some((a) => a.table === 'unused' && a.isTouch === false));
 });
 
 test('parseTableAccesses: degrades (never throws) on garbage', () => {
@@ -126,7 +126,7 @@ test('parseTableAccesses: a column read in a WHERE/filter predicate is a READ, n
   // is read, not written. Only the .set() value (and the update target) are writes.
   const src = `diesel::update(orders::table.filter(orders::customer_id.eq(7)))
     .set(orders::shipment_status.eq("S")).execute(c);`;
-  const acc = parseTableAccesses(src).filter((a) => a.viaScoped);
+  const acc = parseTableAccesses(src).filter((a) => a.isTouch);
   const customer = acc.find((a) => a.column === 'customer_id');
   assert.ok(customer, 'customer_id access found');
   assert.equal(customer.kind, 'read', 'a filter-predicate column is a read');
@@ -136,7 +136,7 @@ test('parseTableAccesses: a column read in a WHERE/filter predicate is a READ, n
 test('parseTableAccesses: fully-qualified crate::schema::orders::table is a touch (not dropped)', () => {
   const src = `fn q(c:&mut C){ crate::schema::orders::table.find(1)
     .select(crate::schema::orders::id).first(c) }`;
-  const acc = parseTableAccesses(src).filter((a) => a.viaScoped);
+  const acc = parseTableAccesses(src).filter((a) => a.isTouch);
   assert.ok(acc.some((a) => a.table === 'orders'), 'fully-qualified access resolves to orders');
   assert.ok(acc.some((a) => a.table === 'orders' && a.column === 'id'), 'qualified column captured');
 });
@@ -145,18 +145,18 @@ test('parseTableAccesses: diesel::update is a CRUD verb, never a pseudo-table to
   const acc = parseTableAccesses('diesel::update(orders::table.find(1)).set(orders::id.eq(1));');
   assert.ok(!acc.some((a) => a.table === 'diesel'), 'no `diesel` pseudo-table');
   assert.ok(!acc.some((a) => a.column === 'update'), 'the CRUD verb is not a column');
-  assert.ok(acc.some((a) => a.table === 'orders' && a.viaScoped), 'the real table touch survives');
+  assert.ok(acc.some((a) => a.table === 'orders' && a.isTouch), 'the real table touch survives');
 });
 
-import { parseFile } from '../src/parse.mjs';
+import { parseFile } from '../src/lang/rust.mjs';
 
 test('parseFile: one parse yields uses + tableDefs + tableAccesses over a single tree', () => {
   const r = parseFile('use crate::schema::orders;\n' +
     'diesel::table! { widgets (id) { id -> BigInt } }\n' +
     'fn q(c:&mut C){ orders::table.find(1).select(orders::id).first(c) }');
-  assert.ok(r.uses.some((u) => u.segments.includes('orders')), 'uses collected');
+  assert.ok(r.imports.some((u) => u.segments.includes('orders')), 'uses collected');
   assert.ok(r.tableDefs.some((d) => d.table === 'widgets'), 'defs collected');
-  assert.ok(r.tableAccesses.some((a) => a.table === 'orders' && a.viaScoped), 'accesses collected');
+  assert.ok(r.tableAccesses.some((a) => a.table === 'orders' && a.isTouch), 'accesses collected');
 });
 
 import { loadConfig } from '../src/config.mjs';
