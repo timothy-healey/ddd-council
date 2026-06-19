@@ -16,9 +16,11 @@ test('orders is flagged as an accidental shared kernel across the two contexts',
 });
 
 test('null owner (migration def-site) + a non-owner write -> high', () => {
+  assert.ok(orders, 'orders finding must exist');
   assert.equal(orders.severity, 'high');
 });
 
 test('the cited def-site is the migration file', () => {
+  assert.ok(orders, 'orders finding must exist');
   assert.match(orders.file, /migrations\/0001_init\/up\.sql$/);
 });
