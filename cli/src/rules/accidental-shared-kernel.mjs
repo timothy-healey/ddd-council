@@ -35,6 +35,18 @@ export function check(graph, config) {
 
     const definedInContext = t.definedIn?.context ?? null;
 
+    // Per-column share — computed up here because the column-level refinement (below)
+    // and the message both consume it. reads/writes are resolved columns; a bare touch
+    // (hasRead/hasWrite true, no resolved column) contributes nothing here.
+    const cols = (a) => [...a.reads, ...a.writes];
+    const touchCount = new Map();
+    for (const c of contexts) {
+      for (const col of new Set(accessors.filter((a) => a.context === c).flatMap(cols))) {
+        touchCount.set(col, (touchCount.get(col) ?? 0) + 1);
+      }
+    }
+    const sharedCols = [...touchCount].filter(([, n]) => n >= 2).map(([col]) => col).sort();
+
     // Severity ladder (write-ness consumed via accessor.writes only — never re-derived):
     //   null owner   -> high if ANY accessor writes (every write is a non-owner write).
     //   derived owner-> high only if a NON-owner writes; owner-write stays medium.
@@ -42,7 +54,20 @@ export function check(graph, config) {
       definedInContext === null
         ? accessors.some((a) => a.hasWrite)
         : accessors.some((a) => a.hasWrite && a.context !== definedInContext);
-    const severity = raisingWrite ? 'high' : 'medium';
+    let severity = raisingWrite ? 'high' : 'medium';
+
+    // Column-level refinement: an UNOWNED table whose accessors touch provably DISJOINT
+    // resolved columns is colocated concerns (shared schema, not shared data), not a
+    // shared-data kernel — downgrade to low and reframe. Evidence-gated: a single bare
+    // touch (column unresolved) forces UNKNOWN, so disjointness is never assumed.
+    // Eligibility excludes both a derived (definedInContext) and a declared (config) owner.
+    const eligibleForDisjointDowngrade =
+      definedInContext === null && tableConfig[table]?.owner == null;
+    const resolvedAll = accessors.every((a) => cols(a).length > 0);
+    const overlap =
+      sharedCols.length > 0 ? 'OVERLAPPING' : resolvedAll ? 'DISJOINT' : 'UNKNOWN';
+    const disjointColocation = eligibleForDisjointDowngrade && overlap === 'DISJOINT';
+    if (disjointColocation) severity = 'low';
 
     // Messaging owner: config override (messaging-only) > derived > none.
     const owner = tableConfig[table]?.owner ?? definedInContext;
@@ -55,14 +80,6 @@ export function check(graph, config) {
     // call out a "sharing" clause for columns >=2 contexts touch — the genuine shared
     // surface — and drop it when the per-context columns already imply the full set
     // (the common single-shared-column case), so the column isn't printed twice.
-    const cols = (a) => [...a.reads, ...a.writes];
-    const touchCount = new Map();
-    for (const c of contexts) {
-      for (const col of new Set(accessors.filter((a) => a.context === c).flatMap(cols))) {
-        touchCount.set(col, (touchCount.get(col) ?? 0) + 1);
-      }
-    }
-    const sharedCols = [...touchCount].filter(([, n]) => n >= 2).map(([col]) => col).sort();
     const allCols = [...new Set(accessors.flatMap(cols))].sort();
     const redundant = sharedCols.length === allCols.length && sharedCols.every((c, i) => c === allCols[i]);
     const colPhrase = sharedCols.length && !redundant ? ` sharing \`${sharedCols.join('`/`')}\`` : '';
@@ -72,21 +89,22 @@ export function check(graph, config) {
     const file = t.definedIn?.file ?? accessors[0]?.file ?? `(table ${table})`;
     const line = t.definedIn?.line ?? accessors[0]?.line ?? 0;
 
-    findings.push(finding({
-      signalId: id,
-      severity,
-      file,
-      line,
-      message:
-        `Table \`${table}\` is touched by ${contexts.length} contexts ` +
-        `(${split})${colPhrase} — ${ownership}: accidental shared kernel.`,
-      suggestedMove:
-        `Give \`${table}\` a single owning context with a published interface ` +
+    // Disjoint colocation reframes the message: shared schema, not shared data.
+    const message = disjointColocation
+      ? `Table \`${table}\` is touched by ${contexts.length} contexts on disjoint columns ` +
+        `(${split}) — colocated concerns, not a shared-data kernel.`
+      : `Table \`${table}\` is touched by ${contexts.length} contexts ` +
+        `(${split})${colPhrase} — ${ownership}: accidental shared kernel.`;
+    const suggestedMove = disjointColocation
+      ? `Split \`${table}\` so each context owns its columns in its own table; the contexts ` +
+        `share a schema, not data. If the colocation is deliberate, declare it: ` +
+        `tables.${table}.sharedKernel = true.`
+      : `Give \`${table}\` a single owning context with a published interface ` +
         `(one context owns it; others ask it to advance state via that interface or a ` +
         `published integration event — not the table), or split the shared columns into ` +
         `the consuming context's own table. If the share is deliberate, declare it: ` +
-        `tables.${table}.sharedKernel = true.`,
-    }));
+        `tables.${table}.sharedKernel = true.`;
+    findings.push(finding({ signalId: id, severity, file, line, message, suggestedMove }));
   }
   return findings;
 }
