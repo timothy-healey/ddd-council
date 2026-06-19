@@ -10,6 +10,7 @@ test('declaration supersedes a previously stored migration def', () => {
   const merged = preferDef(mig, decl);
   assert.equal(merged.defKind, 'declaration');
   assert.equal(merged.definedIn.file, 'src/schema.rs');
+  assert.deepEqual(merged.columns, ['id', 'status'], 'columns updated to declaration columns');
   assert.deepEqual(merged.accessors, [{ file: 'x' }], 'accessors preserved');
 });
 

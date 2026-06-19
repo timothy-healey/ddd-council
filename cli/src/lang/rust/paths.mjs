@@ -19,6 +19,7 @@ export function flattenPath(node) {
       return [...flattenPath(path), ...(name ? [name.text] : [])];
     }
     default:
+      // Fallback: stitch identifier-ish descendants in order.
       return node.text.split('::').map((s) => s.trim()).filter(Boolean);
   }
 }
