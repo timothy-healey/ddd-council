@@ -5,8 +5,11 @@ The deterministic, code-grounded half of [ddd-council](../). Where the council
 DDD anti-patterns from the module/`use` graph. Same finding shape either way, so
 the council can fold engine output straight into a critique.
 
-**Targets Rust** (via tree-sitter). The parsing layer is isolated, so other
-tree-sitter grammars can be dropped in later to go polyglot.
+**Multi-language**, via tree-sitter, behind a swappable language-module seam
+(`src/lang/`): **Rust** (`tree-sitter-rust`) and **TypeScript**
+(`tree-sitter-typescript`) today; a new language is a module that conforms to the
+same `{ parseFile, resolveImport }` contract. Rust resolves imports by module name;
+TypeScript resolves by path (relative + tsconfig `paths` aliases).
 
 ## Usage
 
@@ -36,37 +39,55 @@ Exit code is `1` when findings exist, `0` when clean — usable in CI.
 }
 ```
 
-- **module** — the path segment other code writes after `crate::` / the crate name.
-- **paths** — globs (repo-relative) of files in this context.
-- **publicModules** — the context's public surface; importing through these is fine,
-  importing past anything else is a leak.
+- **module** — *Rust only:* the path segment other code writes after `crate::` / the
+  crate name. TypeScript ignores it (it resolves imports by file path).
+- **paths** — globs (repo-relative) of files in this context. For TypeScript these also
+  resolve imports: a specifier is mapped to a file, then matched against these globs.
+- **publicModules** — *cross-language:* the context's public surface — Rust submodules,
+  or TS public subdirs / `api` barrels. Importing through these is fine, importing past
+  anything else is a leak.
 
-`/ddd-council init` writes a starter `ddd-council.json` for detector-supported
-code repos (Rust today), deriving the contexts from the same scan it uses for
-`DOMAIN.md`. Tune `publicModules`/`thresholds` by hand from there.
+A TypeScript repo may also have a `tsconfig.json`; `detect` reads its `compilerOptions.paths`
+to resolve `@alias/*` imports.
 
-## v1 rules (from `../skills/ddd-council/reference/signals.md` §B)
+`/ddd-council init` writes a starter `ddd-council.json` for Rust repos, deriving the
+contexts from the same scan it uses for `DOMAIN.md`; TS configs are hand-written for now.
+Tune `publicModules`/`thresholds` by hand from there.
+
+## Rules (from `../skills/ddd-council/reference/signals.md` §B)
+
+Import-graph rules (from the module / `use` / `import` graph):
 
 | Signal | What fires it |
 |---|---|
-| `leaky-boundary` | a `use` reaching past a context's public modules into its internals |
+| `leaky-boundary` | an import reaching past a context's public surface into its internals |
 | `circular-dependency` | a cycle in the context dependency graph (Tarjan SCC) |
 | `god-module` | a module imported by ≥N files across ≥M contexts |
 | `cross-context-coupling` | a single file importing from ≥N distinct contexts (chatty) |
 
-Schema-aware rules (accidental shared kernel via shared tables — parsing
-sqlx/diesel/migrations) and the tactical rules are the next milestones.
+Schema-aware rule (from the persistence layer):
+
+| Signal | What fires it |
+|---|---|
+| `accidental-shared-kernel` | a DB table ≥2 contexts read/write that none owns — read from diesel `table!`/query-builder (Rust) and Sequelize models (TypeScript). Write-aware severity: `high` when a non-owner writes it. |
+
+Other-language ORMs (sqlx inline SQL, `.sql` migrations, Prisma/TypeORM) are follow-ups
+behind the same parser contract.
 
 ## Tests
 
 ```bash
-npm test   # node --test; fixture Rust workspace with one of each violation
+npm test   # node --test; Rust + TypeScript fixtures (one of each violation),
+           # plus skip-guarded golden runs over the pinned example repos
 ```
 
-## Limitations (v1)
+## Limitations
 
-- Rust only; relative `self::`/`super::` imports are treated as intra-context.
-- A god module hiding in an *undeclared* crate isn't caught — declare it as a
+- Rust and TypeScript only; Rust relative `self::`/`super::` and TS intra-package
+  relative imports are treated as intra-context.
+- Schema-aware detection reads diesel (Rust) and Sequelize (TypeScript) models; other
+  ORMs and raw SQL/migrations are not parsed yet.
+- A god module hiding in an *undeclared* crate/package isn't caught — declare it as a
   context to surface it.
 - Signals are prompts to investigate, not verdicts: intent (was this coupling
   deliberate?) is the operator's call.

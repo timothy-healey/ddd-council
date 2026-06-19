@@ -35,16 +35,35 @@ One skill, many DDD verbs. Point it at a repo (or a module, a schema, a notes do
 | `vet` | Review a *proposed change* — a plan or spec — **before** it's built: boundary fit, ubiquitous language, refactor-before-add, contradictions with declared intent. Cites design-stage smells; findings amend the plan. |
 | `remediate` | Work a critique's findings to fixes — **refactor-first**, applied inline under TDD; substantial new additions escalate to a written plan. Round-trips resolution status back into the critique artifact. |
 
-The council works **refactor-first** — a shared law: when a fix can be made by reshaping existing code or by adding new code, it prefers the refactor and says why. Tactical verbs (`aggregate`, `entities`, `value-objects`, `events`, `repositories`, …) are on the roadmap.
+**Tactical — model inside an aggregate:**
+
+| Verb | What it does |
+|---|---|
+| `aggregate` | Name a context's aggregate roots, the **invariant** each protects (statement → enforcement sites → gaps), the consistency boundary, and what's inside vs referenced by id. |
+| `entities` / `value-objects` | Classify an aggregate's composition along the identity-vs-value axis; flag entity/value misclassification and primitive obsession at the boundary. |
+| `repositories` | Assess persistence — one repository **per aggregate root**, dealing in whole aggregates; flag repository-per-entity and domain logic leaking into the service layer. |
+| `events` | Assess the domain events an aggregate **publishes** — the named business moment per state transition; flag missing domain events and CRUD masking intent. |
+
+Each tactical verb produces a *model + findings* artifact that round-trips through `remediate`. The council works **refactor-first** — a shared law: when a fix can be made by reshaping existing code or by adding new code, it prefers the refactor and says why.
 
 ### The detector (`cli/`)
 
 The code-grounded half of the plugin. Where the council *reads* code and reasons,
-`detect` *parses* it (Rust, via tree-sitter) and mechanically flags strategic
-anti-patterns from the module graph — `leaky-boundary`, `circular-dependency`,
-`god-module`, `cross-context-coupling` — each with an exact location. `critique`
+`detect` *parses* it — **Rust** (`tree-sitter-rust`) and **TypeScript**
+(`tree-sitter-typescript`), behind a swappable language-module seam — and mechanically
+flags strategic anti-patterns: from the import/module graph, `leaky-boundary`,
+`circular-dependency`, `god-module`, `cross-context-coupling`; and from the persistence
+layer (diesel tables / Sequelize models), `accidental-shared-kernel` — a DB table two
+contexts read/write that none owns. Each finding carries an exact location. `critique`
 runs it first and folds the findings in: the engine finds, the council interprets.
 See [`cli/README.md`](cli/README.md).
+
+Two pinned example repos exercise the detector end-to-end, each with deliberately planted
+patterns and a `PLANTED.md` answer key:
+[`ddd-council-example-rust`](https://github.com/timothy-healey/ddd-council-example-rust)
+(Rust/diesel) and
+[`ddd-council-example-ts`](https://github.com/timothy-healey/ddd-council-example-ts)
+(TypeScript/Sequelize).
 
 ---
 
@@ -79,11 +98,14 @@ Then, in a project:
 
 ## Status
 
-`v0.1.0` — early. In: the strategic verbs, `vet` (pre-build review) and
-`remediate` (refactor-first fixes), the refactor-first shared law, and the Rust
-import-graph detector (with `init` generating its config). Next: schema-aware
-detection (shared-kernel via shared tables), tactical verbs, and multi-language
-grammars.
+`v0.1.0` — early, but the DDD spine is complete. In: the strategic verbs;
+`vet` (pre-build review) and `remediate` (refactor-first fixes); the **full tactical
+spine** (`aggregate`, `entities`/`value-objects`, `repositories`, `events`); the
+refactor-first shared law; and a **multi-language detector** — Rust and TypeScript —
+that flags both import-graph anti-patterns and the schema-aware `accidental-shared-kernel`
+(shared-table coupling), with `init` generating its config and two planted example repos
+guarding it. Next: more language grammars (Python); meta verbs (`model`, `distill`,
+`audit`) that synthesise across the now-rich spine.
 
 ## License
 
