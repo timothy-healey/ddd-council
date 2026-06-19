@@ -77,6 +77,12 @@
       "argumentHint": "[scope]",
       "mode": "both",
       "lens": "strategic"
+    },
+    "model": {
+      "description": "Synthesise the full domain model across all contexts into one coherent whole-system picture by weaving the per-verb artifacts (the context map, the distillation, the aggregate models, the repositories/events findings); re-derives a slice from code only when its artifact is missing. Critique mode (default) assembles the de-facto model and cites §G cross-artifact coherence smells (unacknowledged term collision, orphan in map, slice contradiction); --design assembles the intended model from DOMAIN.md. Descriptive synthesis plus §G only — it does not roll up the slice verbs' own findings (that's audit). Writes docs/model-<date>.md; strategic and council-only, no remediate round-trip.",
+      "argumentHint": "[scope]",
+      "mode": "both",
+      "lens": "strategic"
     }
   }
 }

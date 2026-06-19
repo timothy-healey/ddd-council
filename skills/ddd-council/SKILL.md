@@ -194,7 +194,8 @@ When a verb is invoked, load its reference file and follow it.
 | `repositories` | `reference/repositories.md` | both | Assess a context's persistence: one repository per aggregate root dealing in whole aggregates; cite §D repository-per-entity + domain-logic-in-the-service-layer; round-trips via `remediate`. |
 | `events` | `reference/events.md` | both | Assess the domain events an aggregate publishes (named business moments per state transition); cite §D missing-domain-events + §C CRUD-masking; round-trips via `remediate`. |
 | `distill` | `reference/distill.md` | both | Classify problem-space subdomains core/supporting/generic and map them onto contexts; cite §F mismatches; recommend where to invest. Owns the subdomain classification; strategic, no `remediate` round-trip. |
+| `model` | `reference/model.md` | both | Synthesise the full domain model across contexts from the per-verb artifacts; cite §G cross-artifact coherence smells on the seams. Descriptive synthesis + §G only (no findings roll-up — that's `audit`); strategic, no `remediate` round-trip. |
 
 The tactical spine (`aggregate`, `entities`/`value-objects`, `repositories`, `events`) is
-complete; the first meta verb (`distill`) has shipped. Remaining roadmap verbs (meta: `model`,
-`audit`) are added iteratively.
+complete; the meta verbs `distill` and `model` have shipped. The remaining roadmap verb
+(meta: `audit`) is added iteratively.
