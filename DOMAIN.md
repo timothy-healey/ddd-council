@@ -81,3 +81,8 @@ configuration): `owner`, `sharedKernel`, and the `owner`/`definedInContext` one-
 ruling. A fuller glossary is the `language` verb's output of record at
 `docs/ubiquitous-language.md` — kept local (`docs/` is gitignored), so it is absent
 from a clean checkout; the canonical home for any term load-bearing on the seam is here.
+
+- `distill` is the authority on the **subdomain** classification (core/supporting/generic); its
+  output of record is `docs/distill-<date>.md`, and its findings use the §F distillation smells
+  (`core-fragmented`, `mixed-subdomain-context`, `generic-over-built`, `under-invested-core`,
+  `gold-plated-supporting`). `map`'s per-context tag defers to it.
