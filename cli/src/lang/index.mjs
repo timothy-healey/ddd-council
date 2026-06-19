@@ -18,8 +18,9 @@
 // Each language owns its own resolver config (TS loads tsconfig itself) — ctx stays neutral.
 import { extname } from 'node:path';
 import rust from './rust.mjs';
+import typescript from './typescript.mjs';
 
-const MODULES = [rust];
+const MODULES = [rust, typescript];
 const BY_EXT = new Map();
 for (const m of MODULES) for (const ext of m.extensions) BY_EXT.set(ext, m);
 

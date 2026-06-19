@@ -30,3 +30,55 @@ test('parseFile: malformed source degrades to empty, never throws', () => {
   assert.deepEqual(tableDefs, []);
   assert.deepEqual(tableAccesses, []);
 });
+
+const CONFIG = {
+  contexts: {
+    ordering: { name: 'ordering', module: 'ordering', paths: ['src/ordering/**'], publicModules: ['api'] },
+    billing: { name: 'billing', module: 'billing', paths: ['src/billing/**'], publicModules: ['api'] },
+  },
+  thresholds: {},
+  tables: {},
+};
+function ctx(fromFile) {
+  return { fromFile, fromContext: 'ordering', config: CONFIG, repoRoot: '/repo' };
+}
+
+test('resolveSpecifier: tsconfig alias substitutes the matched tail (pure)', () => {
+  const out = ts.resolveSpecifier('@app/billing/internal/repo', 'src/ordering/service.ts', { baseUrl: '.', paths: { '@app/*': ['src/*'] } });
+  assert.equal(out, 'src/billing/internal/repo');
+});
+
+test('resolveSpecifier: bare package -> null', () => {
+  assert.equal(ts.resolveSpecifier('sequelize', 'src/ordering/service.ts', { baseUrl: '.', paths: {} }), null);
+});
+
+test('resolveImport: relative import reaching another context past its public surface is a leak', () => {
+  const r = ts.resolveImport({ specifier: '../billing/internal/repo', line: 1 }, ctx('src/ordering/service.ts'));
+  assert.equal(r.toContext, 'billing');
+  assert.equal(r.restModule, 'internal');
+  assert.equal(r.isLeak, true);
+  assert.equal(r.moduleKey, 'billing/internal');
+});
+
+test('resolveImport: import through the public surface is not a leak', () => {
+  const r = ts.resolveImport({ specifier: '../billing/api', line: 1 }, ctx('src/ordering/service.ts'));
+  assert.equal(r.toContext, 'billing');
+  assert.equal(r.isLeak, false);
+  assert.equal(r.moduleKey, 'billing/api');
+});
+
+test('resolveImport: importing the context root barrel is not a leak', () => {
+  const r = ts.resolveImport({ specifier: '../billing', line: 1 }, ctx('src/ordering/service.ts'));
+  assert.equal(r.toContext, 'billing');
+  assert.equal(r.restModule, null);
+  assert.equal(r.isLeak, false);
+  assert.equal(r.moduleKey, 'billing');
+});
+
+test('resolveImport: bare package specifier is external -> null', () => {
+  assert.equal(ts.resolveImport({ specifier: 'sequelize', line: 1 }, ctx('src/ordering/service.ts')), null);
+});
+
+test('resolveImport: intra-context relative import -> null', () => {
+  assert.equal(ts.resolveImport({ specifier: './repository', line: 1 }, ctx('src/ordering/service.ts')), null);
+});
