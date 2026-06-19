@@ -12,3 +12,6 @@ node_modules/
 
 # Working docs — specs, plans, roadmap, critiques (kept local)
 docs/
+
+# Local-only automation harness — never commit
+.claude/workflows/
