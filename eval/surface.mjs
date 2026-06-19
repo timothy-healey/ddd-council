@@ -39,11 +39,11 @@ function main() {
   const out = surface();
   if (json) { process.stdout.write(JSON.stringify(out, null, 2) + '\n'); return; }
   const pad = (s, n) => String(s).padEnd(n);
-  process.stdout.write(`${pad('verb', 16)}${pad('SKILL', 8)}${pad('ref', 8)}${pad('signals', 10)}total (est. tok)\n`);
+  process.stdout.write(`${pad('verb', 16)}${pad('SKILL', 8)}${pad('ref', 8)}${pad('signals', 16)}total (est. tok)\n`);
   for (const r of out.perVerb) {
     process.stdout.write(
       `${pad(r.verb, 16)}${pad(r.files.skill, 8)}${pad(r.files.reference, 8)}` +
-      `${pad(`${r.sections.join('')||'—'} ${r.files.signals}`, 10)}${r.estTokens}\n`);
+      `${pad(`${r.sections.join('')||'—'} ${r.files.signals}`, 16)}${r.estTokens}\n`);
   }
   const { sectioned, monolithic, deltaPct } = out.totals;
   process.stdout.write(`\nTOTAL sectioned:  ${sectioned}\nTOTAL monolithic: ${monolithic}  (sectioning saves ${deltaPct}%)\n`);

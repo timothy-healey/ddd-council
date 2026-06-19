@@ -81,6 +81,8 @@ function runCell(cell, model, runs) {
     tokensOut: { median: median(ok.map((t) => t.tokens.output)), min: Math.min(...ok.map((t) => t.tokens.output)), max: Math.max(...ok.map((t) => t.tokens.output)) },
     tokensIn: { median: median(ok.map((t) => t.tokens.input)) },
     missed: [...new Set(ok.flatMap((t) => t.missed))], // union across trials, not just trial 0
+    falsePositive: [...new Set(ok.flatMap((t) => t.falsePositive))],
+    locationRecall: { median: median(ok.map((t) => t.locationRecall)) },
   };
 }
 
@@ -113,7 +115,7 @@ function main() {
 
   for (const c of cells) {
     if (c.status) { process.stdout.write(`${c.verb}@${c.repo}: ${c.status}${c.reason ? ` (${c.reason})` : ''}\n`); continue; }
-    process.stdout.write(`${c.verb}@${c.repo}: recall ${c.recall.median} [${c.recall.min}-${c.recall.max}] · precision ${c.precision.median} · out-tok ${c.tokensOut.median}${c.errored ? ` · ${c.errored} errored` : ''}${c.missed.length ? ` · missed ${c.missed.join(',')}` : ''}\n`);
+    process.stdout.write(`${c.verb}@${c.repo}: recall ${c.recall.median} [${c.recall.min}-${c.recall.max}] · precision ${c.precision.median} · out-tok ${c.tokensOut.median}${c.errored ? ` · ${c.errored} errored` : ''}${c.missed.length ? ` · missed ${c.missed.join(',')}` : ''} · locRecall ${c.locationRecall.median}\n`);
   }
   process.stdout.write(`\nwrote ${file}\n`);
 }

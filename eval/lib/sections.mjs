@@ -34,7 +34,7 @@ export function sectionText(skillDir, letter) {
 export function monolithText(skillDir) {
   const dir = signalsDir(skillDir);
   if (existsSync(dir)) {
-    return readdirSync(dir).filter((f) => f.endsWith('.md')).sort()
+    return readdirSync(dir).filter((f) => /^[A-G]-.*\.md$/.test(f)).sort()
       .map((f) => readFileSync(join(dir, f), 'utf8')).join('\n');
   }
   return readFileSync(monolithPath(skillDir), 'utf8');
