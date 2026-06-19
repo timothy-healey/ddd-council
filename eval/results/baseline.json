@@ -3,27 +3,27 @@
     {
       "verb": "init",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1101,
         "signals": 0
       },
       "sections": [],
-      "estTokens": 4516
+      "estTokens": 4545
     },
     {
       "verb": "map",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 718,
         "signals": 0
       },
       "sections": [],
-      "estTokens": 4133
+      "estTokens": 4162
     },
     {
       "verb": "critique",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1780,
         "signals": 2176
       },
@@ -32,24 +32,24 @@
         "B",
         "C"
       ],
-      "estTokens": 7371
+      "estTokens": 7400
     },
     {
       "verb": "language",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 666,
         "signals": 420
       },
       "sections": [
         "C"
       ],
-      "estTokens": 4501
+      "estTokens": 4530
     },
     {
       "verb": "boundaries",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 861,
         "signals": 1756
       },
@@ -57,46 +57,46 @@
         "A",
         "B"
       ],
-      "estTokens": 6032
+      "estTokens": 6061
     },
     {
       "verb": "remediate",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1246,
         "signals": 0
       },
       "sections": [],
-      "estTokens": 4661
+      "estTokens": 4690
     },
     {
       "verb": "vet",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 995,
         "signals": 738
       },
       "sections": [
         "E"
       ],
-      "estTokens": 5148
+      "estTokens": 5177
     },
     {
       "verb": "aggregate",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1438,
         "signals": 1547
       },
       "sections": [
         "D"
       ],
-      "estTokens": 6400
+      "estTokens": 6429
     },
     {
       "verb": "entities",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1807,
         "signals": 1967
       },
@@ -104,12 +104,12 @@
         "C",
         "D"
       ],
-      "estTokens": 7189
+      "estTokens": 7218
     },
     {
       "verb": "value-objects",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1807,
         "signals": 1967
       },
@@ -117,24 +117,24 @@
         "C",
         "D"
       ],
-      "estTokens": 7189
+      "estTokens": 7218
     },
     {
       "verb": "repositories",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 2034,
         "signals": 1547
       },
       "sections": [
         "D"
       ],
-      "estTokens": 6996
+      "estTokens": 7025
     },
     {
       "verb": "events",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 2023,
         "signals": 1967
       },
@@ -142,36 +142,36 @@
         "C",
         "D"
       ],
-      "estTokens": 7405
+      "estTokens": 7434
     },
     {
       "verb": "distill",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1290,
         "signals": 638
       },
       "sections": [
         "F"
       ],
-      "estTokens": 5343
+      "estTokens": 5372
     },
     {
       "verb": "model",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1589,
         "signals": 645
       },
       "sections": [
         "G"
       ],
-      "estTokens": 5649
+      "estTokens": 5678
     },
     {
       "verb": "audit",
       "files": {
-        "skill": 3415,
+        "skill": 3444,
         "reference": 1770,
         "signals": 5744
       },
@@ -184,12 +184,12 @@
         "F",
         "G"
       ],
-      "estTokens": 10929
+      "estTokens": 10958
     }
   ],
   "totals": {
-    "sectioned": 93462,
-    "monolithic": 141290,
-    "deltaPct": 33.9
+    "sectioned": 93897,
+    "monolithic": 141725,
+    "deltaPct": 33.7
   }
 }

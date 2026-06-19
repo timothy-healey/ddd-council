@@ -4,7 +4,7 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { REPO_ROOT } from './lib/manifest.mjs';
-import { parsePlanted, plantedForVerb } from './lib/planted.mjs';
+import { parsePlanted, plantedForVerb, canonicalId } from './lib/planted.mjs';
 import { score } from './lib/score.mjs';
 
 // (repo, verb, target) cells. Council-verb recall lives on the Rust example;
@@ -64,7 +64,9 @@ function runCell(cell, model, runs) {
       const out = execFileSync('claude',
         ['-p', prompt, '--output-format', 'json', ...(model ? ['--model', model] : [])],
         { cwd: repoDir, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-      const findings = parseFindings(out);
+      // Normalize council ids (prose name OR kebab) to canonical signalId before scoring,
+      // so a correct detection emitted as "god aggregate" matches planted "god-aggregate".
+      const findings = parseFindings(out).map((f) => ({ ...f, signalId: canonicalId(f.signalId) }));
       trials.push({ ...score(findings, planted), tokens: parseUsage(out) });
     } catch (err) {
       trials.push({ status: 'error', error: String(err.message || err).slice(0, 200) });

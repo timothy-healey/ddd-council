@@ -159,8 +159,10 @@ default.
 - **`--findings-json`** (machine-readable findings). After the verb's normal
   output, append exactly one fenced ` ```json ` block: an array of canonical
   **Finding** objects — `{ signalId, severity, file, line, message, suggestedMove }`
-  — one per finding, with `signalId` taken **verbatim from the signals catalog (`reference/signals/`)**
-  and `severity` one of `high|medium|low`. This is the same shape the detector emits
+  — one per finding. `signalId` is the **kebab-case id** from the signal's
+  `(signalId: \`…\`)` marker in the signals catalog (`reference/signals/`) — e.g.
+  `god-aggregate`, **not** the prose bold name ("God aggregate"). `severity` is one of
+  `high|medium|low`. This is the same shape the detector emits
   (`cli/src/finding.mjs`); it is the published surface the eval and `audit` consume.
   Emit the block even when there are no findings (`[]`). Compatible with every verb;
   combine with `--brief` for a lean run.

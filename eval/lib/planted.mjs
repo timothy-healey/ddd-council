@@ -35,6 +35,14 @@ const normalizeId = (cell) => {
   return catalogMap()[k] ?? cell.trim(); // TS PLANTED already uses kebab ids → pass through
 };
 
+/**
+ * Map a council-emitted signal — which may be the canonical kebab id OR the prose
+ * bold name (the council sometimes emits "god aggregate" instead of "god-aggregate")
+ * — to its canonical signalId via the same authoritative catalog map. Identity for
+ * an already-canonical id. Used by the bench so a correct detection isn't a false miss.
+ */
+export const canonicalId = (idOrName) => normalizeId(String(idOrName ?? ''));
+
 /** Parse the markdown table rows out of a PLANTED.md. */
 function tableRows(md) {
   return md.split('\n')

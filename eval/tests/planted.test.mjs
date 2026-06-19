@@ -3,12 +3,20 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { parsePlanted, plantedForVerb, nameToId } from '../lib/planted.mjs';
+import { parsePlanted, plantedForVerb, nameToId, canonicalId } from '../lib/planted.mjs';
 import { REPO_ROOT, loadManifest } from '../lib/manifest.mjs';
 import { monolithText } from '../lib/sections.mjs';
 
 const rust = join(REPO_ROOT, 'examples', 'order-fulfilment');
 const skip = !existsSync(join(rust, 'PLANTED.md')) ? 'submodule not checked out' : false;
+
+test('canonicalId maps a council prose name to its kebab id, passes a kebab id through', () => {
+  // the council sometimes emits the bold prose name instead of the marker id
+  assert.equal(canonicalId('god aggregate'), 'god-aggregate');
+  assert.equal(canonicalId('God Aggregate'), 'god-aggregate');
+  assert.equal(canonicalId('god-aggregate'), 'god-aggregate'); // already canonical → identity
+  assert.equal(canonicalId('leaked invariant'), 'leaked-invariant');
+});
 
 test('nameToId parses both signalId forms from a tiny catalog', () => {
   const md = [
