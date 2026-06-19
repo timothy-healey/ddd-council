@@ -39,6 +39,15 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
   is **cross-language** (Rust submodules ↔ TS public subdirs/barrels); `tsconfig` (baseUrl/paths)
   is a **TS-only** resolution input; `isTouch` is the language-neutral access flag (a real table
   touch vs a universe-seeding import).
+  Track C-SQLx adds two seam terms (owner: Detection engine). A **schema source**
+  is a second participant kind alongside the language module: it provides
+  `{ extensions, parseFile → { tableDefs } }` only — no imports, no `resolveImport`
+  — to seed the table universe (`lang/sql.mjs`, `.sql` migrations, is the first).
+  `defKind` (`'declaration' | 'migration'`) is the def-site provenance flag on
+  `tableDefs`, sibling of `isTouch` on `tableAccesses`: an in-code `'declaration'`
+  is a table's home and supersedes a `'migration'` def-site (graph.mjs), so a
+  migration-only (SQLx) table gets a context-less owner — the same "owned by none"
+  semantics Diesel gets from `schema.rs`.
 
 ## Domain experts
 _Seeded from general knowledge; refine the background/vocabulary as the operator
