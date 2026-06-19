@@ -55,6 +55,22 @@ cluster modules into contexts.
   `signalId: accidental-shared-kernel` — a diesel table ≥2 contexts touch that none
   owns, severity high when a non-owner writes it (declare a deliberate kernel with
   `tables.<table>.sharedKernel = true`).
+  *Declared kernels are honoured (council-side).* The two declarations differ in how the engine
+  treats them, so the council's move differs:
+  - **`sharedKernel: true` → the engine suppresses; the council *names* it.** The table is an
+    intentional **Shared Kernel**, not drift. The engine raises no finding, so the council draws the
+    relationship the engine left implicit: a named Shared Kernel edge between the sharing contexts on
+    the de-facto map. Do not raise `accidental-shared-kernel` for it.
+  - **Declared `owner: X` → the engine still fires; the council *reframes* it.** `owner` is
+    messaging-only (never suppresses), so the engine still emits the finding. The council reframes it
+    as **Customer-Supplier** (X supplies/upstream): a non-owner write is a customer-supplier
+    violation (a downstream writing upstream's schema), not an accidental kernel.
+  - Only a *declared* kernel/owner is honoured. A *derived* owner (the engine's `definedInContext`,
+    undeclared) stays an `accidental-shared-kernel` finding — declared = canon = honour; derived =
+    surface for the operator to declare.
+  This honouring binds **any verb** reasoning about a shared kernel: `critique` applies it directly;
+  `model` (§G3) and `audit` inherit it because the upstream `critique`/`map` artifacts already named
+  the declared relationship (neither reads the config).
 - **Leaky boundary** — a module reaches into another context's *internals* rather
   than its public surface. *Cue:* deep imports (`billing/internal/...`), calling
   private/helper functions across the line, depending on another context's DB rows.
