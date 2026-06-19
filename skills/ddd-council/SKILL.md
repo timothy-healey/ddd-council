@@ -195,7 +195,8 @@ When a verb is invoked, load its reference file and follow it.
 | `events` | `reference/events.md` | both | Assess the domain events an aggregate publishes (named business moments per state transition); cite §D missing-domain-events + §C CRUD-masking; round-trips via `remediate`. |
 | `distill` | `reference/distill.md` | both | Classify problem-space subdomains core/supporting/generic and map them onto contexts; cite §F mismatches; recommend where to invest. Owns the subdomain classification; strategic, no `remediate` round-trip. |
 | `model` | `reference/model.md` | both | Synthesise the full domain model across contexts from the per-verb artifacts; cite §G cross-artifact coherence smells on the seams. Descriptive synthesis + §G only (no findings roll-up — that's `audit`); strategic, no `remediate` round-trip. |
+| `audit` | `reference/audit.md` | critique | Whole-repo findings health report: run the detector, harvest the council artifacts, de-dup into prioritised clusters, list coverage gaps; `--fill` orchestrates the missing verbs. Aggregates §A–§G; no new signals, no `remediate` round-trip. |
 
 The tactical spine (`aggregate`, `entities`/`value-objects`, `repositories`, `events`) is
-complete; the meta verbs `distill` and `model` have shipped. The remaining roadmap verb
-(meta: `audit`) is added iteratively.
+complete, and Track D's meta verbs (`distill`, `model`, `audit`) have all shipped — the DDD verb
+spine is complete.

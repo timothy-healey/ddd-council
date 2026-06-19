@@ -83,6 +83,12 @@
       "argumentHint": "[scope]",
       "mode": "both",
       "lens": "strategic"
+    },
+    "audit": {
+      "description": "Whole-repo findings health report. Runs the mechanical detector (ddd-council-detect --json) for the §A/§B import-graph anti-patterns, harvests the council verbs' existing artifacts (critique/aggregate/repositories/events/distill/model findings under docs/), de-dups them into clusters by location and context-set (one entry per real issue, carrying every contributing signalId and the max severity), prioritises high→low weighted by distill's core classification, and lists coverage gaps (verbs not yet run). Runs zero council verbs by default; --fill [scope] opts into orchestrating the missing verbs in dependency order, logging any canon operator fork rather than fabricating it. Aggregates the existing §A–§G — no new signals; writes docs/audit-<date>.md; critique-only and strategic, no remediate round-trip. Completes Track D.",
+      "argumentHint": "[scope] [--fill] [--all]",
+      "mode": "critique",
+      "lens": "strategic"
     }
   }
 }
