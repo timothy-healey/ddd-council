@@ -60,8 +60,9 @@ finding records what · cited plan section (+ code) · why it matters · suggest
 amendment · status.
 
 **The remedy is to amend the plan.** `status` round-trips as revisions land
-(`open | resolved | deferred`); a deep finding bounces to the `brainstorming` skill for
-redesign. `vet` does **not** feed `remediate` — it's a gate before build, not a code
+(`open | resolved | deferred`), written in the same machine-readable `**Status:**` grammar
+`critique` defines (`reference/critique.md` → Output); a deep finding bounces to the
+`brainstorming` skill for redesign. `vet` does **not** feed `remediate` — it's a gate before build, not a code
 fix. If a finding means "existing code must be refactored *first*", the room says so
 and the operator runs `remediate` separately.
 

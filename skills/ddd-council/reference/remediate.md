@@ -57,16 +57,30 @@ additions always pause.
 
 ## Round-trip — write status back into the artifact
 
-Update the same `docs/critique-<target-slug>-<date>.md` in place. For each finding,
-set its `status` and record the move:
+Update the same `docs/critique-<target-slug>-<date>.md` in place. Each finding keeps its
+stable heading tag and carries **exactly one status line** in the machine-readable grammar
+the artifact contract defines (`reference/critique.md` → Output), so any caller — a human,
+the roadmap harness, a future `audit` — can parse the outcome without re-reading the prose:
 
-- `resolved` — move applied; note the move and the commit ref.
-- `escalated` — handed to a plan; link the plan path.
-- `deferred` — operator chose to skip; note why.
-- `open` — untouched this pass.
+```text
+**Status:** <open | resolved | deferred | escalated>[ (<move-kind>)] — <one-line note>
+```
 
-Re-running `remediate` picks up only `open` findings. The artifact stays the single
-snapshot of the target's state.
+The first token is the canonical state. The four:
+
+- `resolved` — move applied; cite the green test run / commit ref in the note.
+- `escalated` — a refactor can't close it; it needs a written plan or a design decision.
+  Link the plan if one was opened. **A caller must not re-attempt an `escalated` finding** —
+  it is waiting on a decision, not a fix.
+- `deferred` — the operator chose to skip it; note why. Like `escalated`, **not to be
+  re-attempted** until the operator reopens it.
+- `open` — not closed this pass: either untouched, or a refactor was tried and didn't
+  close it. If a refactor *can't* close it, prefer `escalated` over leaving it `open` — an
+  `open` finding is retried next pass, and a design tension reworded in place only resurfaces.
+
+Re-running `remediate` picks up only `open` findings; `resolved | escalated | deferred` are
+left as they are. The artifact stays the single snapshot of the target's state, and its
+status lines are that snapshot's machine-readable record.
 
 ## Room framing
 

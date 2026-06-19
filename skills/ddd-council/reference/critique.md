@@ -98,12 +98,21 @@ artifact `id`.
 - A **drift table**: intended vs observed, per relationship.
 - A **findings list**: each finding gets a stable tag in its heading —
   `### F<n> [severity] <signalId> — <title>` — and records `what · cited location ·
-  why it matters · suggested move · status`. `status` starts `open`; `remediate`
-  round-trips it to `resolved | deferred | escalated`.
+  why it matters · suggested move · status`. The status sits on its own line in a fixed,
+  **machine-readable** grammar so any reader — a human, `remediate`, the roadmap harness,
+  a future `audit` — can parse the outcome without re-reading the prose:
 
-The per-finding body uses the same `Finding` shape the `detect` engine emits
-(`cli/src/finding.mjs`); the `F<n>` tag and `status` wrap it so `remediate` can
-track and round-trip each finding.
+```text
+**Status:** <open | resolved | deferred | escalated>[ (<move-kind>)] — <one-line note>
+```
+
+The first token after `**Status:**` is the canonical state (lower-case, one of the four);
+the text after `—` is the human note. `status` starts `open`; `remediate` round-trips it
+(see `reference/remediate.md` for the four states' semantics). The heading tag and status
+line are a stable contract: `### F<n> [severity] <signalId> —` parses each finding's
+identity, the `**Status:**` line its state. The per-finding body uses the same `Finding`
+shape the `detect` engine emits (`cli/src/finding.mjs`); the `F<n>` tag and status line
+wrap it so any reader can track and round-trip each finding.
 
 ## Guardrails
 
