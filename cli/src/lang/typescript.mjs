@@ -32,6 +32,100 @@ function collectImports(tree) {
   return out;
 }
 
+// The ONE home of Sequelize write-ness (per-language analogue of the diesel verb sets).
+const WRITE_VERBS = new Set(['create', 'bulkCreate', 'update', 'upsert', 'destroy', 'increment', 'decrement', 'findOrCreate', 'restore']);
+const READ_VERBS = new Set(['findAll', 'findOne', 'findByPk', 'findAndCountAll', 'count', 'max', 'min', 'sum']);
+
+// Keys of an object literal node -> column names (best-effort).
+function objectKeys(objNode) {
+  if (!objNode || objNode.type !== 'object') return [];
+  const keys = [];
+  for (const pair of objNode.namedChildren) {
+    if (pair.type !== 'pair') continue;
+    const k = pair.childForFieldName('key');
+    if (k) keys.push(k.text.replace(/^['"`]|['"`]$/g, ''));
+  }
+  return keys;
+}
+
+// tableName from a Sequelize options object literal, or null.
+function tableNameOpt(objNode) {
+  if (!objNode || objNode.type !== 'object') return null;
+  for (const pair of objNode.namedChildren) {
+    if (pair.type !== 'pair') continue;
+    const k = pair.childForFieldName('key');
+    if (k && k.text.replace(/^['"`]|['"`]$/g, '') === 'tableName') {
+      return stringValue(pair.childForFieldName('value'));
+    }
+  }
+  return null;
+}
+
+// member call shape: returns { object, property } identifiers for `obj.prop(...)`, else null.
+function memberCall(node) {
+  if (node.type !== 'call_expression') return null;
+  const fn = node.childForFieldName('function');
+  if (!fn || fn.type !== 'member_expression') return null;
+  const object = fn.childForFieldName('object');
+  const property = fn.childForFieldName('property');
+  if (!object || !property) return null;
+  return { object, property, args: node.childForFieldName('arguments') };
+}
+
+function argAt(argsNode, i) {
+  if (!argsNode) return null;
+  const named = argsNode.namedChildren;
+  return named[i] ?? null;
+}
+
+function collectTableDefs(tree) {
+  const out = [];
+  walkTree(tree, (node) => {
+    const m = memberCall(node);
+    if (!m) return false;
+    const verb = m.property.text;
+    try {
+      if (verb === 'define') {
+        // sequelize.define('Name', {attrs}, {options})
+        const modelName = stringValue(argAt(m.args, 0));
+        const attrs = argAt(m.args, 1);
+        const opts = argAt(m.args, 2);
+        const table = tableNameOpt(opts) ?? modelName;
+        // binding = the variable this define() is assigned to, else the model name.
+        let binding = modelName;
+        for (let p = node.parent; p; p = p.parent) {
+          if (p.type === 'variable_declarator') { binding = (p.childForFieldName('name')?.text) ?? binding; break; }
+        }
+        if (table) out.push({ table, binding, columns: objectKeys(attrs), line: node.startPosition.row + 1 });
+      } else if (verb === 'init' && m.object.type === 'identifier') {
+        // Model.init({attrs}, {options})
+        const binding = m.object.text;
+        const attrs = argAt(m.args, 0);
+        const opts = argAt(m.args, 1);
+        const table = tableNameOpt(opts) ?? binding;
+        out.push({ table, binding, columns: objectKeys(attrs), line: node.startPosition.row + 1 });
+      }
+    } catch { /* tolerant: skip this def */ }
+    return false; // a define/init may nest; keep scanning siblings
+  });
+  return out;
+}
+
+function collectTableAccesses(tree) {
+  const out = [];
+  walkTree(tree, (node) => {
+    const m = memberCall(node);
+    if (!m || m.object.type !== 'identifier') return false;
+    const verb = m.property.text;
+    const isWrite = WRITE_VERBS.has(verb);
+    const isRead = READ_VERBS.has(verb);
+    if (!isWrite && !isRead) return false;
+    out.push({ binding: m.object.text, column: null, kind: isWrite ? 'write' : 'read', line: node.startPosition.row + 1, isTouch: true });
+    return false;
+  });
+  return out;
+}
+
 /**
  * Parse one TypeScript source file. Tolerant: unparseable source -> empty collections.
  * @returns {{ imports: Array<{specifier:string,line:number}>, tableDefs: Array, tableAccesses: Array }}
@@ -43,7 +137,7 @@ export function parseFile(source) {
   } catch {
     return { imports: [], tableDefs: [], tableAccesses: [] };
   }
-  return { imports: collectImports(tree), tableDefs: [], tableAccesses: [] };
+  return { imports: collectImports(tree), tableDefs: collectTableDefs(tree), tableAccesses: collectTableAccesses(tree) };
 }
 
 // TS owns its own resolver config (vet P1): load tsconfig baseUrl/paths, memoised by repoRoot

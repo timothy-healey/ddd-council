@@ -47,6 +47,7 @@ export function buildGraph(repoRoot, config) {
   const refs = [];
   const contextEdges = new Map();
   const tables = new Map();        // tableName -> { definedIn, columns, accessors }
+  const bindingToTable = new Map(); // binding (or table name) -> canonical table name
   const pendingAccesses = [];      // { table, column, kind, line, file, context } (form b only)
 
   for (const abs of listSourceFiles(repoRoot)) {
@@ -62,9 +63,11 @@ export function buildGraph(repoRoot, config) {
     // Keep the FIRST definition seen (matches the columns rule below): one table has
     // one def-site here, so the cited owner/line is stable regardless of scan order.
     for (const def of tableDefs) {
-      if (tables.has(def.table)) continue;
-      const definedIn = { file: rel, context: fromContext, line: def.line };
-      tables.set(def.table, { definedIn, columns: def.columns, accessors: [] });
+      if (!tables.has(def.table)) {
+        const definedIn = { file: rel, context: fromContext, line: def.line };
+        tables.set(def.table, { definedIn, columns: def.columns, accessors: [] });
+      }
+      bindingToTable.set(def.binding ?? def.table, def.table);
     }
 
     // --- Track B: table accesses (only form (b) scoped touches count) ---
@@ -99,7 +102,8 @@ export function buildGraph(repoRoot, config) {
   // to `writes` — so a file that both reads and writes the table keeps both, and a
   // later write of one column never overwrites an earlier read of another.
   for (const acc of pendingAccesses) {
-    const t = tables.get(acc.table);
+    const tableName = bindingToTable.get(acc.binding ?? acc.table) ?? acc.table;
+    const t = tables.get(tableName);
     if (!t) continue; // not a discovered table — ignore
     let row = t.accessors.find((r) => r.file === acc.file);
     if (!row) {

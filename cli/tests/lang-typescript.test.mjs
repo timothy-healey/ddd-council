@@ -82,3 +82,28 @@ test('resolveImport: bare package specifier is external -> null', () => {
 test('resolveImport: intra-context relative import -> null', () => {
   assert.equal(ts.resolveImport({ specifier: './repository', line: 1 }, ctx('src/ordering/service.ts')), null);
 });
+
+test('parseFile: sequelize.define yields a tableDef with table, binding, columns', () => {
+  const src = `const Order = sequelize.define('Order', { id: {}, status: {} }, { tableName: 'orders' });\n`;
+  const { tableDefs } = ts.parseFile(src);
+  const def = tableDefs.find((d) => d.table === 'orders');
+  assert.ok(def, 'orders table defined');
+  assert.equal(def.binding, 'Order');
+  assert.deepEqual(def.columns.sort(), ['id', 'status']);
+});
+
+test('parseFile: class + .init yields a tableDef bound to the class name', () => {
+  const src = `class Shipment extends Model {}\nShipment.init({ id: {} }, { tableName: 'shipments' });\n`;
+  const def = ts.parseFile(src).tableDefs.find((d) => d.table === 'shipments');
+  assert.ok(def);
+  assert.equal(def.binding, 'Shipment');
+});
+
+test('parseFile: classifies model accesses read vs write', () => {
+  const src = `Order.update({ status: 'x' });\nOrder.findAll();\n`;
+  const acc = ts.parseFile(src).tableAccesses;
+  const w = acc.find((a) => a.binding === 'Order' && a.kind === 'write');
+  const r = acc.find((a) => a.binding === 'Order' && a.kind === 'read');
+  assert.ok(w && w.isTouch === true, 'update is a write touch');
+  assert.ok(r, 'findAll is a read');
+});
