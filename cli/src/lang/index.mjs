@@ -14,13 +14,21 @@
 //   } | null                                        //   hub key god-module groups on.
 //                                                    // ctx = { fromFile, fromContext, config, repoRoot }
 //
+// A *schema source* is a second participant kind: it seeds the table universe only.
+// It provides `extensions` and `parseFile -> { imports: [], tableDefs, tableAccesses: [] }`
+// and has NO resolveImport. `lang/sql.mjs` (.sql migrations) is the first; its
+// tableDefs carry `defKind: 'migration'` (graph.mjs gives in-code 'declaration' defs
+// precedence). graph.mjs reads imports/tableDefs/tableAccesses independently, so a
+// tableDefs-only participant needs no special-casing.
+//
 // A new language conforms to THIS contract; graph.mjs and rules/* never branch on language.
 // Each language owns its own resolver config (TS loads tsconfig itself) — ctx stays neutral.
 import { extname } from 'node:path';
 import rust from './rust.mjs';
 import typescript from './typescript.mjs';
+import sql from './sql.mjs';
 
-const MODULES = [rust, typescript];
+const MODULES = [rust, typescript, sql];
 const BY_EXT = new Map();
 for (const m of MODULES) for (const ext of m.extensions) BY_EXT.set(ext, m);
 
