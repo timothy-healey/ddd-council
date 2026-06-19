@@ -91,3 +91,8 @@ from a clean checkout; the canonical home for any term load-bearing on the seam 
   synthesis/coherence smells (`unacknowledged-term-collision`, `orphan-in-map`,
   `slice-contradiction`) — cross-artifact contradictions only. `model` owns the *seams between
   slices*, not any slice's interior; the findings roll-up is `audit`'s job.
+- `audit` is the whole-repo **findings health report**; its output of record is
+  `docs/audit-<date>.md`. It is the cross-half consumer of the **Council↔Detector seam** — it runs
+  the detector (`ddd-council-detect --json`) and folds its `Finding[]` in alongside the harvested
+  council-artifact findings, de-duped into *clusters* by location + context-set. Aggregates §A–§G
+  (no new signals); the findings roll-up `model`'s §G feeds into.
