@@ -4,6 +4,21 @@ import { join, relative, sep, extname } from 'node:path';
 import * as registry from './lang/index.mjs';
 import { contextForFile } from './config.mjs';
 
+// Def-site precedence (seam term `defKind`): an in-code 'declaration' is a table's
+// home; a 'migration' def-site is the fallback. A declaration supersedes a stored
+// migration def (preserving accumulated accessors); a migration never supersedes a
+// declaration; equal priority keeps the first seen. `existing` is a tables-map entry,
+// `def` is { file, context, line, columns, defKind? }.
+export function preferDef(existing, def) {
+  const incoming = def.defKind ?? 'declaration';
+  if (existing.defKind === 'migration' && incoming === 'declaration') {
+    existing.definedIn = { file: def.file, context: def.context, line: def.line };
+    existing.columns = def.columns;
+    existing.defKind = incoming;
+  }
+  return existing;
+}
+
 // `.claude` is skipped alongside the build/VCS dirs: a target repo can hold nested
 // worktrees under `.claude/worktrees/` (full working copies of itself). Descending
 // into them re-discovers every table and re-reports every leak per worktree, and
@@ -34,6 +49,7 @@ function listSourceFiles(root) {
  *   tables: Map<string, {                    // Track B (additive): derived data-coupling
  *     definedIn: { file: string, context: string|null, line: number } | null,
  *     columns: string[],
+ *     defKind: 'declaration' | 'migration',
  *     // One row per (table, file). reads/writes stay SEPARATE per column so the
  *     // read/write direction the parser classified survives the merge — a file that
  *     // both reads and writes the table keeps both, and which column was written is
@@ -62,12 +78,20 @@ export function buildGraph(repoRoot, config) {
     const { imports, tableDefs, tableAccesses } = lang.parseFile(readFileSync(abs, 'utf8'));
 
     // --- Track B: table definitions (where each table lives => its owning context) ---
-    // Keep the FIRST definition seen (matches the columns rule below): one table has
-    // one def-site here, so the cited owner/line is stable regardless of scan order.
+    // Keep the FIRST definition seen by default; `preferDef` promotes a 'declaration'
+    // over a stored 'migration' so the canonical def-site is stable regardless of
+    // scan order.
     for (const def of tableDefs) {
+      const defKind = def.defKind ?? 'declaration';
       if (!tables.has(def.table)) {
-        const definedIn = { file: rel, context: fromContext, line: def.line };
-        tables.set(def.table, { definedIn, columns: def.columns, accessors: [] });
+        tables.set(def.table, {
+          definedIn: { file: rel, context: fromContext, line: def.line },
+          columns: def.columns,
+          defKind,
+          accessors: [],
+        });
+      } else {
+        preferDef(tables.get(def.table), { file: rel, context: fromContext, line: def.line, columns: def.columns, defKind });
       }
       // Index is run-global: two files binding the same local name to different tables collide (last-writer-wins).
       bindingToTable.set(def.binding ?? def.table, def.table);
