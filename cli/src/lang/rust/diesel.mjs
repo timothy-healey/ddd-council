@@ -121,7 +121,7 @@ const CRUD_CALLS = new Set(['insert_into', 'update', 'delete']);
 
 // Known ORM/framework crate names that should never be mistaken for a table name in a
 // scoped path. `sqlx::query` must not emit a touch of table `sqlx`.
-const KNOWN_CRATES = new Set(['diesel', 'sqlx']);
+const KNOWN_CRATES = new Set(['sqlx']);
 
 // Collect form-(b) scoped table touches from a tree, classified read/write.
 function collectScopedTouches(tree) {

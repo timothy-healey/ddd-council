@@ -34,7 +34,7 @@ function callName(node) {
   if (node.type === 'identifier') return node.text;
   if (node.type === 'generic_function') {
     const fn_ = node.childForFieldName('function');
-    return fn_ ? fn_.text : null;
+    return fn_ ? callName(fn_) : null;
   }
   if (node.type === 'scoped_identifier' || node.type === 'field_expression') {
     const segs = flattenPath(node);

@@ -32,6 +32,12 @@ test('query_as turbofish call form -> touch', () => {
   assert.deepEqual(t.map((x) => [x.table, x.kind]), [['orders', 'read']]);
 });
 
+test('sqlx::query_as turbofish (scoped) call form -> touch', () => {
+  const src = 'fn f(p: &Pool) { sqlx::query_as::<_, Order>("SELECT * FROM orders").fetch_all(p); }';
+  const t = touches(src);
+  assert.deepEqual(t.map((x) => [x.table, x.kind]), [['orders', 'read']]);
+});
+
 test('dynamic SQL (format!) -> no touch (tolerant skip)', () => {
   const src = 'fn f() { let q = format!("SELECT * FROM {}", t); sqlx::query(&q); }';
   assert.deepEqual(touches(src), []);
