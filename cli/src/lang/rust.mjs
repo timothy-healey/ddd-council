@@ -6,6 +6,7 @@ import { contextForModule } from '../config.mjs';
 import { walkTree } from './walk.mjs';
 import { flattenPath } from './rust/paths.mjs';
 import { collectTableDefs, collectScopedTouches, importedTables } from './rust/diesel.mjs';
+import { collectSqlxAccesses } from './rust/sqlx.mjs';
 
 const parser = new Parser();
 parser.setLanguage(Rust);
@@ -106,7 +107,8 @@ export function parseFile(source) {
     imports: uses,
     tableDefs: collectTableDefs(tree),
     // form (a) imports seed the universe; form (b) scoped paths are the precise touch.
-    tableAccesses: [...importedTables(uses), ...collectScopedTouches(tree)],
+    // form (c) SQLx query sites (macro & call forms).
+    tableAccesses: [...importedTables(uses), ...collectScopedTouches(tree), ...collectSqlxAccesses(tree)],
   };
 }
 

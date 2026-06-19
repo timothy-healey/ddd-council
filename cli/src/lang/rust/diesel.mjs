@@ -119,6 +119,10 @@ function scopedTableRef(node) {
 // touch — `diesel::update` must not masquerade as a touch of a table named `diesel`.
 const CRUD_CALLS = new Set(['insert_into', 'update', 'delete']);
 
+// Known ORM/framework crate names that should never be mistaken for a table name in a
+// scoped path. `sqlx::query` must not emit a touch of table `sqlx`.
+const KNOWN_CRATES = new Set(['diesel', 'sqlx']);
+
 // Collect form-(b) scoped table touches from a tree, classified read/write.
 function collectScopedTouches(tree) {
   const out = [];
@@ -126,7 +130,7 @@ function collectScopedTouches(tree) {
     if (node.type !== 'scoped_identifier') return false;
     try {
       const ref = scopedTableRef(node);
-      if (ref && !CRUD_CALLS.has(ref.name)) {
+      if (ref && !CRUD_CALLS.has(ref.name) && !KNOWN_CRATES.has(ref.table)) {
         // `<t>::table` carries no real column; `<t>::<col>` does.
         const column = ref.name === 'table' ? null : ref.name;
         out.push({
