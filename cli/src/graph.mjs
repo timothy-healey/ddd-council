@@ -1,8 +1,8 @@
-// Builds the context-level dependency graph from parsed Rust files.
-import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
-import { parseFile } from './parse.mjs';
-import { contextForFile, contextForModule } from './config.mjs';
+// Builds the context-level dependency graph from parsed source files.
+import { readdirSync, readFileSync } from 'node:fs';
+import { join, relative, sep, extname } from 'node:path';
+import * as registry from './lang/index.mjs';
+import { contextForFile } from './config.mjs';
 
 // `.claude` is skipped alongside the build/VCS dirs: a target repo can hold nested
 // worktrees under `.claude/worktrees/` (full working copies of itself). Descending
@@ -11,26 +11,19 @@ import { contextForFile, contextForModule } from './config.mjs';
 // scanner sees each source file exactly once.
 const SKIP_DIRS = new Set(['target', 'node_modules', '.git', '.claude']);
 
-function listRustFiles(root) {
+function listSourceFiles(root) {
+  const exts = registry.extensions();
   const out = [];
   (function walk(dir) {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       if (entry.isDirectory()) {
         if (!SKIP_DIRS.has(entry.name)) walk(join(dir, entry.name));
-      } else if (entry.name.endsWith('.rs')) {
+      } else if (exts.includes(extname(entry.name))) {
         out.push(join(dir, entry.name));
       }
     }
   })(root);
   return out;
-}
-
-// Strip leading crate/self/super; return null if the path is intra-context relative.
-function normalizeLeading(segments) {
-  let segs = [...segments];
-  if (segs[0] === 'crate') segs = segs.slice(1);
-  if (segs[0] === 'self' || segs[0] === 'super') return null; // relative → same context
-  return segs;
 }
 
 /**
@@ -56,13 +49,14 @@ export function buildGraph(repoRoot, config) {
   const tables = new Map();        // tableName -> { definedIn, columns, accessors }
   const pendingAccesses = [];      // { table, column, kind, line, file, context } (form b only)
 
-  for (const abs of listRustFiles(repoRoot)) {
+  for (const abs of listSourceFiles(repoRoot)) {
     const rel = relative(repoRoot, abs).split(sep).join('/');
+    const lang = registry.forFile(rel);
+    if (!lang) continue;
     const fromContext = contextForFile(rel, config);
     files.push({ file: rel, context: fromContext });
 
-    // Parse the file ONCE; every collector rides that single tree.
-    const { uses, tableDefs, tableAccesses } = parseFile(readFileSync(abs, 'utf8'));
+    const { imports, tableDefs, tableAccesses } = lang.parseFile(readFileSync(abs, 'utf8'));
 
     // --- Track B: table definitions (where each table lives => its owning context) ---
     // Keep the FIRST definition seen (matches the columns rule below): one table has
@@ -75,40 +69,26 @@ export function buildGraph(repoRoot, config) {
 
     // --- Track B: table accesses (only form (b) scoped touches count) ---
     for (const a of tableAccesses) {
-      if (!a.viaScoped) continue; // form (a) imports seed the universe, not a touch
+      if (!a.isTouch) continue; // form (a) imports seed the universe, not a touch
       pendingAccesses.push({ ...a, file: rel, context: fromContext });
     }
 
-    for (const u of uses) {
-      const segs = normalizeLeading(u.segments);
-      if (!segs || segs.length === 0) continue;
-      const toContext = contextForModule(segs[0], config);
-      if (!toContext) continue; // external crate / std
-      if (toContext === fromContext) continue; // intra-context use
-
-      const rest = segs.slice(1); // everything after the context's module segment
-      const restModule = rest.length >= 1 ? rest[0] : null; // submodule/item reached through
-      const targetCtx = config.contexts[toContext];
-      const throughPublic = restModule && targetCtx.publicModules.includes(restModule);
-      // A leak is any reach into the context past its declared public surface —
-      // including importing a private submodule directly (`use billing::repo;`),
-      // not only members nested below one (`use billing::repo::PgRepo;`). Importing
-      // the context root itself (`use billing;`) carries no submodule and is fine.
-      const isLeak = rest.length >= 1 && !throughPublic;
-
+    for (const rec of imports) {
+      const r = lang.resolveImport(rec, { fromFile: rel, fromContext, config, repoRoot });
+      if (!r) continue;
       refs.push({
         fromFile: rel,
         fromContext,
-        toContext,
-        restModule,
-        isLeak,
-        line: u.line,
-        path: segs.join('::'),
+        toContext: r.toContext,
+        restModule: r.restModule,
+        isLeak: r.isLeak,
+        line: rec.line,
+        path: r.displayPath,
+        moduleKey: r.moduleKey,
       });
-
       if (fromContext) {
         if (!contextEdges.has(fromContext)) contextEdges.set(fromContext, new Set());
-        contextEdges.get(fromContext).add(toContext);
+        contextEdges.get(fromContext).add(r.toContext);
       }
     }
   }

@@ -9,11 +9,9 @@ export function check(graph, config) {
   // Group cross-context refs by the target module (path minus the final item).
   const groups = new Map(); // moduleKey -> { files:Set, contexts:Set, line, sampleFile }
   for (const ref of graph.refs) {
-    // Group by the target module — the context segment plus its first submodule —
-    // so `use billing::api` and `use billing::api::Invoice` count toward the same
-    // hub instead of splitting fan-in across `billing` and `billing::api`.
-    const segs = ref.path.split('::');
-    const moduleKey = segs.length > 1 ? segs.slice(0, 2).join('::') : segs[0];
+    // Group by the neutral hub key the language resolver provides (Rust: `billing::api`;
+    // TS: `billing/api`) — stable across importer location, no language-shape parsing here.
+    const moduleKey = ref.moduleKey;
     if (!groups.has(moduleKey)) {
       groups.set(moduleKey, { files: new Set(), contexts: new Set() });
     }
