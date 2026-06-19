@@ -15,3 +15,7 @@ docs/
 
 # Local-only automation harness — never commit
 .claude/workflows/
+
+# Eval run records — local; the committed baseline is the exception
+eval/results/*
+!eval/results/baseline.json
