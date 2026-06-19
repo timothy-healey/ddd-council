@@ -11,8 +11,9 @@ developers doing DDD strategic design.
 Two halves, two stacks:
 - **Council** — Markdown skill + per-verb playbooks (`skills/ddd-council/SKILL.md`,
   `skills/ddd-council/reference/`), with thin bash/JSON glue (`scripts/`).
-- **Detector** — Node.js ESM (`.mjs`, Node ≥18). Parses Rust via `tree-sitter` +
-  `tree-sitter-rust`, builds a `use`/module graph, runs rule modules (`cli/src/`).
+- **Detector** — Node.js ESM (`.mjs`, Node ≥18). Multi-language behind a language-module
+  seam (`cli/src/lang/`): Rust via `tree-sitter-rust`, TypeScript via `tree-sitter-typescript`.
+  Builds an import/module graph, runs rule modules (`cli/src/`).
 
 ## Bounded contexts
 _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`._
@@ -21,7 +22,7 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
   register, verb, operator, signal.*
 - **Detection engine** — `parse → graph → rules`; mechanically flags strategic
   anti-patterns from the module graph. Language: *import, module, context
-  membership, finding, SCC, fan-in/fan-out, threshold.*
+  membership, finding, SCC, fan-in/fan-out, threshold, binding.*
 - **Context configuration** (candidate seam) — `ddd-council.json` ⇄ `DOMAIN.md`,
   and the shared **Finding** shape that both halves emit. Looks like the
   published language / shared kernel between Council and Detector; worth naming
@@ -31,6 +32,13 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
   follow-up). `owner` and the engine-derived `definedInContext` are one concept —
   the table's owning context — in two provenances (carried inline here, not in the
   gitignored `docs/`).
+  Track C publishes the **language-module interface** to this seam — the contract
+  `{ extensions, parseFile → { imports, tableDefs, tableAccesses }, resolveImport → {…}|null }`
+  (owner: Detection engine; a new language conforms to it). Seam term clarifications: `module`
+  is **Rust-resolution only** (TS resolves imports by path via `contextForFile`); `publicModules`
+  is **cross-language** (Rust submodules ↔ TS public subdirs/barrels); `tsconfig` (baseUrl/paths)
+  is a **TS-only** resolution input; `isTouch` is the language-neutral access flag (a real table
+  touch vs a universe-seeding import).
 
 ## Domain experts
 _Seeded from general knowledge; refine the background/vocabulary as the operator
