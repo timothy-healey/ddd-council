@@ -52,6 +52,9 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
   is a table's home and supersedes a `'migration'` def-site (graph.mjs), so a
   migration-only (SQLx) table gets a context-less owner — the same "owned by none"
   semantics Diesel gets from `schema.rs`.
+  The `accidental-shared-kernel` rule is **column-aware**: on an unowned table it distinguishes
+  shared-data overlap (high/medium) from disjoint colocation (low — colocated concerns, split the
+  table), gated on resolved columns (a bare touch stays UNKNOWN, no downgrade).
 
 ## Domain experts
 _Seeded from general knowledge; refine the background/vocabulary as the operator

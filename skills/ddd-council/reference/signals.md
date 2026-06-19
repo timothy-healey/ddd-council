@@ -55,6 +55,10 @@ cluster modules into contexts.
   `signalId: accidental-shared-kernel` — a diesel table ≥2 contexts touch that none
   owns, severity high when a non-owner writes it (declare a deliberate kernel with
   `tables.<table>.sharedKernel = true`).
+  *Column-level:* when the engine can resolve which columns each context touches, an **unowned**
+  table whose contexts touch **disjoint** columns is emitted at **low** severity and reframed as
+  *colocated concerns — split the table* (shared schema, not shared data); overlapping columns,
+  unresolved columns, and ownership violations keep high/medium.
   *Declared kernels are honoured (council-side).* The two declarations differ in how the engine
   treats them, so the council's move differs:
   - **`sharedKernel: true` → the engine suppresses; the council *names* it.** The table is an
