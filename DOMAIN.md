@@ -86,3 +86,8 @@ from a clean checkout; the canonical home for any term load-bearing on the seam 
   output of record is `docs/distill-<date>.md`, and its findings use the §F distillation smells
   (`core-fragmented`, `mixed-subdomain-context`, `generic-over-built`, `under-invested-core`,
   `gold-plated-supporting`). `map`'s per-context tag defers to it.
+- `model` synthesises the **whole-system model** across contexts from the per-verb artifacts (the
+  *slices*); its output of record is `docs/model-<date>.md`, and its findings use the §G
+  synthesis/coherence smells (`unacknowledged-term-collision`, `orphan-in-map`,
+  `slice-contradiction`) — cross-artifact contradictions only. `model` owns the *seams between
+  slices*, not any slice's interior; the findings roll-up is `audit`'s job.
