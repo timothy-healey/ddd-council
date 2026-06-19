@@ -29,7 +29,7 @@ function listSourceFiles(root) {
 /**
  * @returns {{
  *   files: Array<{ file: string, context: string|null }>,
- *   refs: Array<{ fromFile, fromContext, toContext, restModule, isLeak, line, path }>,
+ *   refs: Array<{ fromFile, fromContext, toContext, restModule, isLeak, line, path, moduleKey }>,
  *   contextEdges: Map<string, Set<string>>,  // fromContext -> set of toContext
  *   tables: Map<string, {                    // Track B (additive): derived data-coupling
  *     definedIn: { file: string, context: string|null, line: number } | null,
@@ -38,7 +38,9 @@ function listSourceFiles(root) {
  *     // read/write direction the parser classified survives the merge — a file that
  *     // both reads and writes the table keeps both, and which column was written is
  *     // not lost to a single mutable `kind`.
- *     accessors: Array<{ file: string, context: string|null, reads: string[], writes: string[], line: number }>
+ *     // hasWrite/hasRead are set on EVERY touch regardless of column (TS has column:null),
+ *     // so direction is always faithfully recorded even when column arrays are empty.
+ *     accessors: Array<{ file: string, context: string|null, reads: string[], writes: string[], hasWrite: boolean, hasRead: boolean, line: number }>
  *   }>
  * }}
  */
@@ -67,6 +69,7 @@ export function buildGraph(repoRoot, config) {
         const definedIn = { file: rel, context: fromContext, line: def.line };
         tables.set(def.table, { definedIn, columns: def.columns, accessors: [] });
       }
+      // Index is run-global: two files binding the same local name to different tables collide (last-writer-wins).
       bindingToTable.set(def.binding ?? def.table, def.table);
     }
 
@@ -107,9 +110,10 @@ export function buildGraph(repoRoot, config) {
     if (!t) continue; // not a discovered table — ignore
     let row = t.accessors.find((r) => r.file === acc.file);
     if (!row) {
-      row = { file: acc.file, context: acc.context, reads: [], writes: [], line: acc.line };
+      row = { file: acc.file, context: acc.context, reads: [], writes: [], hasWrite: false, hasRead: false, line: acc.line };
       t.accessors.push(row);
     }
+    if (acc.kind === 'write') row.hasWrite = true; else row.hasRead = true;
     const bucket = acc.kind === 'write' ? row.writes : row.reads;
     if (acc.column && !bucket.includes(acc.column)) bucket.push(acc.column);
     if (acc.line < row.line) row.line = acc.line;
