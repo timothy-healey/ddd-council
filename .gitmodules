@@ -1,3 +1,6 @@
 [submodule "examples/order-fulfilment"]
 	path = examples/order-fulfilment
 	url = https://github.com/timothy-healey/ddd-council-example-rust.git
+[submodule "examples/order-ts"]
+	path = examples/order-ts
+	url = https://github.com/timothy-healey/ddd-council-example-ts.git
