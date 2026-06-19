@@ -22,29 +22,49 @@ function topLevelSegments(body) {
   return segs;
 }
 
+// Extract the body between the opening '(' and its depth-matched closing ')'.
+// Returns { body, end } where end is the index just after the closing ')'.
+// Returns null if no matching close paren is found (tolerant).
+function extractBody(sql, openIdx) {
+  let depth = 0;
+  for (let i = openIdx; i < sql.length; i++) {
+    if (sql[i] === '(') depth++;
+    else if (sql[i] === ')') {
+      depth--;
+      if (depth === 0) return { body: sql.slice(openIdx + 1, i), end: i + 1 };
+    }
+  }
+  return null;
+}
+
 export function parseCreateTables(sql) {
   if (!sql) return [];
   const out = [];
-  // Match `CREATE TABLE [IF NOT EXISTS] <name> ( <body> )` with a balanced-ish body.
+  // Match only the header: `CREATE TABLE [IF NOT EXISTS] <name>` up to the opening '('.
   // Name: optional schema prefix with quoting variants: word, "word", `word`, "s"."t", s.t, etc.
-  const re = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?((?:[`"\[]?[\w]+[`"\]]?\.)*[`"\[]?[\w]+[`"\]]?)\s*\(([\s\S]*?)\)\s*;/gi;
+  const re = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?((?:[`"\[]?[\w]+[`"\]]?\.)*[`"\[]?[\w]+[`"\]]?)\s*\(/gi;
   let m;
   while ((m = re.exec(sql)) !== null) {
     try {
+      const openIdx = m.index + m[0].length - 1; // index of the '('
+      const extracted = extractBody(sql, openIdx);
+      if (!extracted) continue; // no matching close paren — skip
       const table = bareTableName(m[1]);
       const before = sql.slice(0, m.index);
       const line = before.split('\n').length;
       const columns = [];
-      for (const seg of topLevelSegments(m[2])) {
+      for (const seg of topLevelSegments(extracted.body)) {
         const t = seg.trim();
         if (!t) continue;
-        const head = t.match(/^([`"\[]?[\w.]+[`"\]]?)/)?.[1];
+        const head = t.match(/^([`"\[]?[\w]+[`"\]]?)/)?.[1];
         if (!head) continue;
         const word = bareTableName(head).toUpperCase();
         if (CONSTRAINT_HEADS.has(word)) continue;
         columns.push(bareTableName(head));
       }
       if (table) out.push({ table, columns, line });
+      // Advance past the body so the next exec starts after the closing ')'
+      re.lastIndex = extracted.end;
     } catch { /* skip this malformed CREATE TABLE */ }
   }
   return out;

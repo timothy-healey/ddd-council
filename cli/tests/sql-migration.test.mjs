@@ -36,3 +36,15 @@ test('malformed input -> empty, never throws', () => {
   assert.deepEqual(parseCreateTables('CREATE TABL'), []);
   assert.deepEqual(parseCreateTables(''), []);
 });
+
+test('columns after a nested-paren default are still captured', () => {
+  const defs = parseCreateTables(
+    "CREATE TABLE t ( id BIGINT DEFAULT nextval('t_id_seq'), name TEXT );");
+  assert.deepEqual(defs[0].columns, ['id', 'name']);
+});
+
+test('inline CHECK(...) does not truncate the column list', () => {
+  const defs = parseCreateTables(
+    'CREATE TABLE t ( id BIGINT, price BIGINT CHECK (price > 0), label TEXT );');
+  assert.deepEqual(defs[0].columns, ['id', 'price', 'label']);
+});
