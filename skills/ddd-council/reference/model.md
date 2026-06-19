@@ -57,7 +57,7 @@ slice; `model` owns the *whole* and the *seams between slices*.
    cross-context relationships (from `map`). Cite each line's source slice.
 3. **Coherence pass (§G).** Lay the slices side by side and cite cross-artifact contradictions —
    `unacknowledged-term-collision`, `orphan-in-map`, `slice-contradiction` (see
-   `reference/signals.md` §G). Each finding names the two slices in conflict; in critique mode it
+   `reference/signals/G-coherence.md`). Each finding names the two slices in conflict; in critique mode it
    also cites a code location. **§G never re-runs code detection the engine or `critique` owns** —
    it reads the disagreement between what two slices recorded.
 4. **Coverage report.** List contexts/aggregates with no modelled slice and name the verb to run to

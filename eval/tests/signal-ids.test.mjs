@@ -1,13 +1,16 @@
 // eval/tests/signal-ids.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const signals = readFileSync(
-  join(repoRoot, 'skills', 'ddd-council', 'reference', 'signals.md'), 'utf8');
+const signalsDir = join(repoRoot, 'skills', 'ddd-council', 'reference', 'signals');
+const signals = existsSync(signalsDir)
+  ? readdirSync(signalsDir).filter(f => f.endsWith('.md')).sort()
+      .map(f => readFileSync(join(signalsDir, f), 'utf8')).join('\n')
+  : readFileSync(join(repoRoot, 'skills', 'ddd-council', 'reference', 'signals.md'), 'utf8');
 
 const REQUIRED_IDS = [
   // §A

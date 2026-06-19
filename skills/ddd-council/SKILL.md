@@ -159,7 +159,7 @@ default.
 - **`--findings-json`** (machine-readable findings). After the verb's normal
   output, append exactly one fenced ` ```json ` block: an array of canonical
   **Finding** objects — `{ signalId, severity, file, line, message, suggestedMove }`
-  — one per finding, with `signalId` taken **verbatim from `reference/signals.md`**
+  — one per finding, with `signalId` taken **verbatim from the signals catalog (`reference/signals/`)**
   and `severity` one of `high|medium|low`. This is the same shape the detector emits
   (`cli/src/finding.mjs`); it is the published surface the eval and `audit` consume.
   Emit the block even when there are no findings (`[]`). Compatible with every verb;
@@ -181,7 +181,7 @@ to the `target` and lens so a large repo doesn't drown the room; if a strategic
 verb is run unscoped on a big repo, ask for a scope first. Cache the acquired
 model for the session; re-scan only when the target/scope changes.
 
-**What to look for:** `reference/signals.md` is the shared detection catalog —
+**What to look for:** `reference/signals/` is the shared detection catalog —
 the concrete code cues for context boundaries, strategic anti-patterns, and
 language smells. `critique`, `boundaries`, and `language` draw on it; every
 finding should trace to a signal and cite a location.

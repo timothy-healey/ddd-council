@@ -55,7 +55,7 @@ rejected and why (per *Teach as you apply*).
    the room can't settle from evidence. Never invent the business's competitive core.
 3. **Map subdomains → contexts.** In critique mode, read the repo and **cite §F mismatches** with a
    file/module location: `core-fragmented`, `mixed-subdomain-context`, `generic-over-built`,
-   `under-invested-core`, `gold-plated-supporting` (see `reference/signals.md` §F).
+   `under-invested-core`, `gold-plated-supporting` (see `reference/signals/F-distillation.md`).
 4. **Investment guidance** — per classification, state where to spend, what to stop building, and
    what to buy. This is the payoff.
 5. **Show the friction** before converging (architect vs engineer on whether a "core" claim is

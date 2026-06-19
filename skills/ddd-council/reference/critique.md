@@ -80,8 +80,8 @@ language smells), the room reads the code itself.
    `context-map.md`). Mark: matches, drift (intended X, code does Y), and
    surprises (relationships nobody declared).
 4. **Flag anti-patterns** with severity and citation, working from the shared
-   catalog in `reference/signals.md` (§A context-boundary signals, §B strategic
-   anti-patterns, §C language smells). Each finding traces to a signal id and a
+   catalog: `reference/signals/A-context-boundary.md` (§A), `reference/signals/B-strategic.md`
+   (§B), `reference/signals/C-language.md` (§C). Each finding traces to a signal id and a
    code location. **Honour declared kernels (§B):** read the `tables` block of the
    repo's `ddd-council.json` and apply the §B rule per its two cases —
    `sharedKernel: true` → the engine suppressed it, so **name a Shared Kernel edge**

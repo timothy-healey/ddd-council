@@ -1,0 +1,194 @@
+{
+  "perVerb": [
+    {
+      "verb": "init",
+      "files": {
+        "skill": 3415,
+        "reference": 1101,
+        "signals": 0
+      },
+      "sections": [],
+      "estTokens": 4516
+    },
+    {
+      "verb": "map",
+      "files": {
+        "skill": 3415,
+        "reference": 718,
+        "signals": 0
+      },
+      "sections": [],
+      "estTokens": 4133
+    },
+    {
+      "verb": "critique",
+      "files": {
+        "skill": 3415,
+        "reference": 1780,
+        "signals": 2176
+      },
+      "sections": [
+        "A",
+        "B",
+        "C"
+      ],
+      "estTokens": 7371
+    },
+    {
+      "verb": "language",
+      "files": {
+        "skill": 3415,
+        "reference": 666,
+        "signals": 420
+      },
+      "sections": [
+        "C"
+      ],
+      "estTokens": 4501
+    },
+    {
+      "verb": "boundaries",
+      "files": {
+        "skill": 3415,
+        "reference": 861,
+        "signals": 359
+      },
+      "sections": [
+        "A"
+      ],
+      "estTokens": 4635
+    },
+    {
+      "verb": "remediate",
+      "files": {
+        "skill": 3415,
+        "reference": 1246,
+        "signals": 0
+      },
+      "sections": [],
+      "estTokens": 4661
+    },
+    {
+      "verb": "vet",
+      "files": {
+        "skill": 3415,
+        "reference": 995,
+        "signals": 738
+      },
+      "sections": [
+        "E"
+      ],
+      "estTokens": 5148
+    },
+    {
+      "verb": "aggregate",
+      "files": {
+        "skill": 3415,
+        "reference": 1438,
+        "signals": 1547
+      },
+      "sections": [
+        "D"
+      ],
+      "estTokens": 6400
+    },
+    {
+      "verb": "entities",
+      "files": {
+        "skill": 3415,
+        "reference": 1807,
+        "signals": 1967
+      },
+      "sections": [
+        "C",
+        "D"
+      ],
+      "estTokens": 7189
+    },
+    {
+      "verb": "value-objects",
+      "files": {
+        "skill": 3415,
+        "reference": 1807,
+        "signals": 1967
+      },
+      "sections": [
+        "C",
+        "D"
+      ],
+      "estTokens": 7189
+    },
+    {
+      "verb": "repositories",
+      "files": {
+        "skill": 3415,
+        "reference": 2034,
+        "signals": 1547
+      },
+      "sections": [
+        "D"
+      ],
+      "estTokens": 6996
+    },
+    {
+      "verb": "events",
+      "files": {
+        "skill": 3415,
+        "reference": 2023,
+        "signals": 1967
+      },
+      "sections": [
+        "C",
+        "D"
+      ],
+      "estTokens": 7405
+    },
+    {
+      "verb": "distill",
+      "files": {
+        "skill": 3415,
+        "reference": 1290,
+        "signals": 638
+      },
+      "sections": [
+        "F"
+      ],
+      "estTokens": 5343
+    },
+    {
+      "verb": "model",
+      "files": {
+        "skill": 3415,
+        "reference": 1589,
+        "signals": 645
+      },
+      "sections": [
+        "G"
+      ],
+      "estTokens": 5649
+    },
+    {
+      "verb": "audit",
+      "files": {
+        "skill": 3415,
+        "reference": 1770,
+        "signals": 5744
+      },
+      "sections": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "estTokens": 10929
+    }
+  ],
+  "totals": {
+    "sectioned": 92065,
+    "monolithic": 141290,
+    "deltaPct": 34.8
+  }
+}

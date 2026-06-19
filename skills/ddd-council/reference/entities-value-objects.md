@@ -50,7 +50,7 @@ drop back to `boundaries`/`map` first — *strategic before tactical* is a share
 
 ## Signals
 
-Work from `reference/signals.md`:
+Work from `reference/signals/D-tactical.md` (§D) and `reference/signals/C-language.md` (§C):
 
 - **§D — entity/value-object misclassification** (this verb owns it): a type on the wrong
   side of the identity-vs-value axis.

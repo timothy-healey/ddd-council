@@ -36,7 +36,7 @@ Read three things together:
 
 ## Signals
 
-Work from `reference/signals.md` **§E (design-stage smells)** — the design-tense
+Work from `reference/signals/E-design-stage.md` **§E (design-stage smells)** — the design-tense
 catalog. Each finding traces to a §E signal id and cites the **plan section** (plus
 affected code where relevant). §E cross-references the code-stage siblings (§A–§C), so
 the language is one vocabulary across stages.
