@@ -30,9 +30,41 @@ export function nameToId(signalsMd) {
 let _catalog = null;
 const catalogMap = () => (_catalog ??= nameToId(monolithText(loadManifest().skillDir)));
 
+// Grammatical connectors that the council drops/adds freely between a prose name
+// and its kebab id (e.g. canonical `domain-logic-in-service-layer` vs the council's
+// `domain-logic-in-the-service-layer`). Stripped before token-set comparison.
+const STOPWORDS = new Set(['the', 'a', 'an', 'at', 'in', 'of', 'on', 'to', 'for', 'into', 'and', 'or', 'with', 'vs', 'via']);
+
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const tokenSig = (s) => slug(s).split('-').filter((t) => t && !STOPWORDS.has(t)).sort().join('|');
+
+// Two derived indexes over the catalog, each built lazily and uniqueness-guarded so an
+// ambiguous match falls through to pass-through rather than silently collapsing two signals:
+//   slug(prose name) → id        catches a kebab-cased full prose name (primitive-obsession-at-the-boundary)
+//   stopword-stripped token sig of the canonical id → id   catches stopword near-misses (…-in-the-…)
+let _derived = null;
+function derived() {
+  if (_derived) return _derived;
+  const slugMap = {};
+  const sigMap = {};
+  const seenSig = new Set();
+  for (const [name, id] of Object.entries(catalogMap())) {
+    slugMap[slug(name)] = id;
+    const sig = tokenSig(id);
+    if (sigMap[sig] && sigMap[sig] !== id) { sigMap[sig] = null; } // ambiguous → disable
+    else if (!seenSig.has(sig)) { sigMap[sig] = id; seenSig.add(sig); }
+  }
+  return (_derived = { slugMap, sigMap });
+}
+
 const normalizeId = (cell) => {
   const k = cell.trim().toLowerCase();
-  return catalogMap()[k] ?? cell.trim(); // TS PLANTED already uses kebab ids → pass through
+  if (catalogMap()[k]) return catalogMap()[k];           // exact prose name (spaces)
+  const { slugMap, sigMap } = derived();
+  if (slugMap[k]) return slugMap[k];                     // kebab-cased prose name
+  const hit = sigMap[tokenSig(k)];
+  if (hit) return hit;                                   // stopword-insensitive token match
+  return cell.trim();                                    // already-canonical / TS kebab → pass through
 };
 
 /**

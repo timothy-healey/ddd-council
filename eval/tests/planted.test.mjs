@@ -18,6 +18,17 @@ test('canonicalId maps a council prose name to its kebab id, passes a kebab id t
   assert.equal(canonicalId('leaked invariant'), 'leaked-invariant');
 });
 
+test('canonicalId resolves a kebab-cased prose name to its shorter canonical id', () => {
+  // council kebab-cases the full bold name "Primitive obsession at the boundary";
+  // the catalog id is the shorter `primitive-obsession`.
+  assert.equal(canonicalId('primitive-obsession-at-the-boundary'), 'primitive-obsession');
+});
+
+test('canonicalId resolves a near-miss id (extra stopword) to canonical', () => {
+  // council emits the shortened kebab with an extra "the"; catalog id has none.
+  assert.equal(canonicalId('domain-logic-in-the-service-layer'), 'domain-logic-in-service-layer');
+});
+
 test('nameToId parses both signalId forms from a tiny catalog', () => {
   const md = [
     '- **God aggregate** — one root pulls in too much. *(signalId: `god-aggregate`)*',
