@@ -51,12 +51,13 @@
       "files": {
         "skill": 3415,
         "reference": 861,
-        "signals": 359
+        "signals": 1756
       },
       "sections": [
-        "A"
+        "A",
+        "B"
       ],
-      "estTokens": 4635
+      "estTokens": 6032
     },
     {
       "verb": "remediate",
@@ -187,8 +188,8 @@
     }
   ],
   "totals": {
-    "sectioned": 92065,
+    "sectioned": 93462,
     "monolithic": 141290,
-    "deltaPct": 34.8
+    "deltaPct": 33.9
   }
 }
