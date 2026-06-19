@@ -71,6 +71,12 @@
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
       "lens": "tactical"
+    },
+    "distill": {
+      "description": "Separate the problem-space subdomains, classify each core/supporting/generic, map them onto the contexts, and recommend where to invest (build the core, adequate the supporting, buy the generic). Design mode classifies from intent (operator is canon on what is core); critique mode reads the repo and cites §F mismatches (core fragmented, mixed-subdomain context, generic over-built, under-invested core, gold-plated supporting). Owns the core/supporting/generic call — map's tag defers to it. Writes docs/distill-<date>.md; strategic and council-only, no remediate round-trip.",
+      "argumentHint": "[scope]",
+      "mode": "both",
+      "lens": "strategic"
     }
   }
 }
