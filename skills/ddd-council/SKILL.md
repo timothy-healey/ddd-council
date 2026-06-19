@@ -154,6 +154,17 @@ default.
   teaching asides, document written immediately. Genuine domain-fact pauses still
   happen in both. Override per call with `--brief` / `--workshop`.
 
+## Output modes
+
+- **`--findings-json`** (machine-readable findings). After the verb's normal
+  output, append exactly one fenced ` ```json ` block: an array of canonical
+  **Finding** objects — `{ signalId, severity, file, line, message, suggestedMove }`
+  — one per finding, with `signalId` taken **verbatim from `reference/signals.md`**
+  and `severity` one of `high|medium|low`. This is the same shape the detector emits
+  (`cli/src/finding.mjs`); it is the published surface the eval and `audit` consume.
+  Emit the block even when there are no findings (`[]`). Compatible with every verb;
+  combine with `--brief` for a lean run.
+
 ## Context acquisition
 
 Before the room convenes, build the council's footing from two layers:
