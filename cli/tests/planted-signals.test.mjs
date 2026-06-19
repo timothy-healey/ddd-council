@@ -38,3 +38,29 @@ test('drift guard: every PLANTED.md signal exists in signals.md', {
       `signals.md no longer contains: "${sig}" — PLANTED.md has drifted from the catalog`);
   }
 });
+
+const tsPlantedPath = join(repoRoot, 'examples', 'order-ts', 'PLANTED.md');
+
+// The signalIds order-ts/PLANTED.md asserts (detector rules only).
+const TS_PLANTED_SIGNALS = [
+  'leaky-boundary',
+  'circular-dependency',
+  'god-module',
+  'cross-context-coupling',
+  'accidental-shared-kernel',
+];
+
+test('drift guard (order-ts): every PLANTED.md signal exists in signals.md', {
+  skip: !existsSync(tsPlantedPath) ? 'submodule not checked out' : false,
+}, () => {
+  const planted = readFileSync(tsPlantedPath, 'utf8').toLowerCase();
+  const signals = readFileSync(signalsPath, 'utf8').toLowerCase();
+  for (const sig of TS_PLANTED_SIGNALS) {
+    assert.ok(planted.includes(sig.toLowerCase()),
+      `order-ts/PLANTED.md is missing declared signal: ${sig}`);
+  }
+  for (const sig of TS_PLANTED_SIGNALS) {
+    assert.ok(signals.includes(sig.toLowerCase()),
+      `signals.md no longer contains: "${sig}" — order-ts/PLANTED.md has drifted from the catalog`);
+  }
+});

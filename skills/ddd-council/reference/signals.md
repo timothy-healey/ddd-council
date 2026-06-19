@@ -59,7 +59,9 @@ cluster modules into contexts.
   than its public surface. *Cue:* deep imports (`billing/internal/...`), calling
   private/helper functions across the line, depending on another context's DB rows.
   *Why:* the boundary exists in name only; the foreign model has leaked in. *Confirm:*
-  what's the intended public surface of the imported context?
+  what's the intended public surface of the imported context? *Engine:* emitted as
+  `signalId: leaky-boundary` — an import that crosses a context line into an `internal`
+  path rather than the context's `api` surface.
 - **Missing anti-corruption layer** — a context consumes an upstream/external model
   with no translation, letting foreign vocabulary spread inward. *Cue:* external
   DTOs / third-party types used directly in domain code; gateway responses passed
@@ -68,15 +70,20 @@ cluster modules into contexts.
 - **Circular dependency between contexts** — A depends on B and B on A. *Cue:* an
   import cycle across context lines. *Why:* there's no clear upstream/downstream;
   they can't evolve or deploy independently. *Confirm:* which way *should* the
-  dependency point?
+  dependency point? *Engine:* emitted as `signalId: circular-dependency` — a cycle
+  detected in the cross-context import graph.
 - **Chatty coupling** — two contexts exchange many fine-grained calls to do one
   job. *Cue:* a single use-case making N cross-context calls; ping-pong between
   modules. *Why:* the boundary is in the wrong place or missing a coarser contract.
-  *Confirm:* should responsibility move, or a coarser operation be published?
+  *Confirm:* should responsibility move, or a coarser operation be published? *Engine:*
+  emitted as `signalId: cross-context-coupling` — a single file importing from
+  ≥N distinct contexts (threshold: `chattyFanOut` in `ddd-council.json`).
 - **God module / hub** — one module almost everything imports. *Cue:* a `common`,
   `core`, `utils`, or `shared` module with very high fan-in spanning contexts. *Why:*
   it's an undeclared shared kernel and a change-amplifier. *Confirm:* what really
-  belongs here (truly generic) vs what's a context's model hiding in `shared`?
+  belongs here (truly generic) vs what's a context's model hiding in `shared`? *Engine:*
+  emitted as `signalId: god-module` — a module imported by ≥N files across ≥M distinct
+  contexts (thresholds: `godModuleFanIn` / `godModuleContexts` in `ddd-council.json`).
 - **Distributed monolith** — separate services/modules that can't change without
   changing each other in lockstep. *Cue:* cross-service shared schemas, synchronous
   call chains, coordinated deploys. *Why:* the cost of distribution with none of the
