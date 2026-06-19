@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Token-efficiency eval harness for the ddd-council skill.",
   "scripts": {
-    "test": "node --test eval/tests",
+    "test": "node --test 'eval/tests/**/*.test.mjs'",
     "eval:surface": "node eval/surface.mjs",
     "eval:bench": "node eval/bench.mjs"
   },
