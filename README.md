@@ -4,7 +4,7 @@
 
 One skill, many DDD verbs. Point it at a repo (or a module, a schema, a notes doc) and the room reasons about your domain *from the code that's actually there*, not from vibes.
 
-> Architecture inspired by [Impeccable](https://github.com/pbakaus/impeccable) — one user-invocable skill with commands underneath, rather than a pile of standalone skills polluting your `/` menu.
+> One user-invocable skill with commands underneath, rather than a pile of standalone skills cluttering your `/` menu.
 
 ---
 
@@ -46,6 +46,14 @@ One skill, many DDD verbs. Point it at a repo (or a module, a schema, a notes do
 
 Each tactical verb produces a *model + findings* artifact that round-trips through `remediate`. The council works **refactor-first** — a shared law: when a fix can be made by reshaping existing code or by adding new code, it prefers the refactor and says why.
 
+**Meta — synthesise across the spine:**
+
+| Verb | What it does |
+|---|---|
+| `distill` | Classify the problem-space subdomains **core / supporting / generic** and map them onto your contexts; flag mismatches (a core subdomain spread thin, a generic one over-built) and recommend where to invest. The single owner of subdomain classification; strategic, no `remediate` round-trip. |
+| `model` | Synthesise the **whole-system model** across contexts by weaving the per-verb artifacts (the map, the distillation, the aggregate/repository/event models) into one coherent picture; flag cross-artifact **coherence smells** on the seams — an unacknowledged term collision, a map reference with no model behind it, a slice that contradicts a named relationship. Descriptive synthesis plus those seam findings only. |
+| `audit` | A whole-repo **findings health report**: run the detector, harvest every verb's existing findings, **de-dup them into clusters** (one entry per real issue, by location + contexts, carrying every signal that flagged it), prioritise — weighted toward the core — and list coverage gaps. `--fill` orchestrates the verbs that haven't run yet. Aggregates everything; adds no new signals. |
+
 ### The detector (`cli/`)
 
 The code-grounded half of the plugin. Where the council *reads* code and reasons,
@@ -53,9 +61,12 @@ The code-grounded half of the plugin. Where the council *reads* code and reasons
 (`tree-sitter-typescript`), behind a swappable language-module seam — and mechanically
 flags strategic anti-patterns: from the import/module graph, `leaky-boundary`,
 `circular-dependency`, `god-module`, `cross-context-coupling`; and from the persistence
-layer (diesel tables / Sequelize models), `accidental-shared-kernel` — a DB table two
-contexts read/write that none owns. Each finding carries an exact location. `critique`
-runs it first and folds the findings in: the engine finds, the council interprets.
+layer (diesel + sqlx tables, Sequelize models, and `.sql` migrations),
+`accidental-shared-kernel` — a DB table two contexts read/write that none owns. That rule
+is **column-aware**: when it can resolve which columns each context touches, a table whose
+contexts touch *disjoint* columns is downgraded to a low-severity "colocated concerns, split
+it" rather than a high-coupling shared-data kernel. Each finding carries an exact location.
+`critique` runs it first and folds the findings in: the engine finds, the council interprets.
 See [`cli/README.md`](cli/README.md).
 
 Two pinned example repos exercise the detector end-to-end, each with deliberately planted
@@ -98,14 +109,14 @@ Then, in a project:
 
 ## Status
 
-`v0.1.0` — early, but the DDD spine is complete. In: the strategic verbs;
+`v0.1.0` — early, but the **full DDD verb spine is complete**. In: the strategic verbs;
 `vet` (pre-build review) and `remediate` (refactor-first fixes); the **full tactical
-spine** (`aggregate`, `entities`/`value-objects`, `repositories`, `events`); the
-refactor-first shared law; and a **multi-language detector** — Rust and TypeScript —
-that flags both import-graph anti-patterns and the schema-aware `accidental-shared-kernel`
-(shared-table coupling), with `init` generating its config and two planted example repos
-guarding it. Next: more language grammars (Python); meta verbs (`model`, `distill`,
-`audit`) that synthesise across the now-rich spine.
+spine** (`aggregate`, `entities`/`value-objects`, `repositories`, `events`); **all three
+meta verbs** (`distill` subdomain classification, `model` whole-system synthesis, `audit`
+findings health report); the refactor-first shared law; and a **multi-language detector** —
+Rust and TypeScript — that flags both import-graph anti-patterns and the column-aware,
+schema-aware `accidental-shared-kernel` (shared-table coupling, across diesel + sqlx +
+Sequelize), with `init` generating its config and two planted example repos guarding it.
 
 ## License
 
