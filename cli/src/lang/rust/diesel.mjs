@@ -61,9 +61,14 @@ const READ_VERBS = new Set(['filter', 'find', 'select', 'load', 'first', 'get_re
 function governingVerb(call, node) {
   const args = call.childForFieldName('arguments');
   if (!args) return null;
-  // Is `node` within the `arguments` subtree?
+  // Is `node` within the `arguments` subtree? Compare by the stable numeric `.id`,
+  // NOT `===`: node-tree-sitter hands out fresh JS wrappers for the same underlying
+  // node and its per-tree wrapper cache can be evicted under GC/memory pressure, so
+  // `cur === args` is intermittently false even when they are the same node. Under
+  // full-suite concurrent load that flips a `.set(...)` write to a read (the safe
+  // default), so a write column silently vanishes. `.id` is identity-stable per tree.
   for (let cur = node; cur; cur = cur.parent) {
-    if (cur === args) {
+    if (cur.id === args.id) {
       const fn = call.childForFieldName('function');
       if (!fn) return null;
       if (fn.type === 'field_expression') {
@@ -73,7 +78,7 @@ function governingVerb(call, node) {
       const segs = flattenPath(fn);
       return segs.length ? segs[segs.length - 1] : null;
     }
-    if (cur === call) return null; // reached the call without crossing into args
+    if (cur.id === call.id) return null; // reached the call without crossing into args
   }
   return null;
 }

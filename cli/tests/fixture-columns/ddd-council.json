@@ -1,0 +1,9 @@
+{
+  "contexts": {
+    "ordering":   { "module": "ordering",   "paths": ["src/ordering/**"] },
+    "fulfilment": { "module": "fulfilment", "paths": ["src/fulfilment/**"] }
+  },
+  "tables": {
+    "priced": { "owner": "ordering" }
+  }
+}

@@ -4,73 +4,121 @@
       "description": "Interview the operator and write DOMAIN.md: product, stack, known bounded contexts, the domain-expert roster, and the default lens. Read first by every other verb.",
       "argumentHint": "[repo-path]",
       "mode": "setup",
-      "lens": "—"
+      "lens": "—",
+      "reference": "reference/init.md",
+      "signals": []
     },
     "map": {
       "description": "Generate a context map from intent: bounded contexts, subdomain classification (core/supporting/generic), and named, directed relationships between them.",
       "argumentHint": "[notes-or-repo]",
       "mode": "design",
-      "lens": "strategic"
+      "lens": "strategic",
+      "reference": "reference/map.md",
+      "signals": []
     },
     "critique": {
       "description": "Read the repo and surface the de-facto context map the code actually implies versus what was intended. Flags drift and anti-patterns; every claim cites code.",
       "argumentHint": "[repo-path-or-module]",
       "mode": "critique",
-      "lens": "strategic"
+      "lens": "strategic",
+      "reference": "reference/critique.md",
+      "signals": ["A", "B", "C"]
     },
     "language": {
       "description": "Build or refine the ubiquitous language for a context; in critique mode, flag where the code's names diverge from the agreed language.",
       "argumentHint": "[context-or-module]",
       "mode": "both",
-      "lens": "strategic"
+      "lens": "strategic",
+      "reference": "reference/language.md",
+      "signals": ["C"]
     },
     "boundaries": {
       "description": "Assess bounded-context boundaries and name the relationship pattern across a seam: shared kernel, customer-supplier, conformist, anti-corruption layer, open-host, partnership, separate ways.",
       "argumentHint": "[contextA contextB]",
       "mode": "both",
-      "lens": "strategic"
+      "lens": "strategic",
+      "reference": "reference/boundaries.md",
+      "signals": ["A", "B"]
     },
     "remediate": {
       "description": "Work a critique's findings to fixes: refactor existing code first (inline, test-first), and escalate substantial new additions to a written plan. Reads docs/critique-<target-slug>-<date>.md and round-trips resolution status back into it.",
       "argumentHint": "[target] [F<n>]",
       "mode": "remediate",
-      "lens": "tactical"
+      "lens": "tactical",
+      "reference": "reference/remediate.md",
+      "signals": []
     },
     "vet": {
       "description": "Review a proposed change (plan or spec) for DDD design soundness before it is built: boundary fit, ubiquitous language, refactor-before-add, and contradictions with DOMAIN.md/spec. Reads the doc + DOMAIN.md + affected code; findings amend the plan, not the code.",
       "argumentHint": "[plan-or-spec.md]",
       "mode": "vet",
-      "lens": "strategic"
+      "lens": "strategic",
+      "reference": "reference/vet.md",
+      "signals": ["E"]
     },
     "aggregate": {
       "description": "Name a bounded context's aggregate roots, the invariant each protects, the consistency boundary, and what is held inside vs referenced by id. Critique mode cites code; design mode proposes from intent. Lands the four root-level section-D tactical signals; writes docs/aggregate-<context-slug>-<date>.md (model + findings) that round-trips via remediate.",
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
-      "lens": "tactical"
+      "lens": "tactical",
+      "reference": "reference/aggregate.md",
+      "signals": ["D"]
     },
     "entities": {
       "description": "Classify the types within a bounded context's aggregates as entities (identity + lifecycle) or value objects (defined by value). Critique mode cites code; design mode proposes from intent. Prefers the aggregate artifact's composition list when present, else derives it. Lands the section-D entity/value-object misclassification signal and surfaces the section-C primitive-obsession smell; writes docs/entities-<context-slug>-<date>.md (model + findings) that round-trips via remediate. Alias of value-objects — one playbook.",
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
-      "lens": "tactical"
+      "lens": "tactical",
+      "reference": "reference/entities-value-objects.md",
+      "signals": ["C", "D"]
     },
     "value-objects": {
       "description": "Classify the types within a bounded context's aggregates as entities (identity + lifecycle) or value objects (defined by value). Critique mode cites code; design mode proposes from intent. Prefers the aggregate artifact's composition list when present, else derives it. Lands the section-D entity/value-object misclassification signal and surfaces the section-C primitive-obsession smell; writes docs/entities-<context-slug>-<date>.md (model + findings) that round-trips via remediate. Alias of entities — one playbook.",
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
-      "lens": "tactical"
+      "lens": "tactical",
+      "reference": "reference/entities-value-objects.md",
+      "signals": ["C", "D"]
     },
     "repositories": {
       "description": "Assess how a bounded context's aggregates persist: one repository per aggregate root, dealing in whole aggregates — not one per entity, and not with domain logic leaked into the application/service layer. Critique mode cites code; design mode proposes from intent. Prefers the aggregate artifact's roots and composition when present, else derives them. Lands the section-D repository-per-entity signal and the new section-D domain-logic-in-the-application/service-layer (persistence seam) signal; writes docs/repositories-<context-slug>-<date>.md (model + findings) that round-trips via remediate. Council-only; reads persistence at DDD altitude, not SQL correctness or performance.",
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
-      "lens": "tactical"
+      "lens": "tactical",
+      "reference": "reference/repositories.md",
+      "signals": ["D"]
     },
     "events": {
       "description": "Assess the domain events a bounded context's aggregates publish: the named business moments (Shipped, Cancelled) that signal a meaningful state transition. Critique mode cites code; design mode proposes the events that should exist from intent. Takes roots from the aggregate artifact when present, derives state transitions from code. Lands the section-D missing-domain-events signal and cites the section-C CRUD-masking-intent smell (discriminator: no event emitted is section-D; misnamed operation is section-C). Writes docs/events-<context-slug>-<date>.md (model + findings) that round-trips via remediate. Council-only and tactical; cross-context integration events are the boundaries verb's job.",
       "argumentHint": "[context] or [context/Root]",
       "mode": "both",
-      "lens": "tactical"
+      "lens": "tactical",
+      "reference": "reference/events.md",
+      "signals": ["C", "D"]
+    },
+    "distill": {
+      "description": "Separate the problem-space subdomains, classify each core/supporting/generic, map them onto the contexts, and recommend where to invest (build the core, adequate the supporting, buy the generic). Design mode classifies from intent (operator is canon on what is core); critique mode reads the repo and cites §F mismatches (core fragmented, mixed-subdomain context, generic over-built, under-invested core, gold-plated supporting). Owns the core/supporting/generic call — map's tag defers to it. Writes docs/distill-<date>.md; strategic and council-only, no remediate round-trip.",
+      "argumentHint": "[scope]",
+      "mode": "both",
+      "lens": "strategic",
+      "reference": "reference/distill.md",
+      "signals": ["F"]
+    },
+    "model": {
+      "description": "Synthesise the full domain model across all contexts into one coherent whole-system picture by weaving the per-verb artifacts (the context map, the distillation, the aggregate models, the repositories/events findings); re-derives a slice from code only when its artifact is missing. Critique mode (default) assembles the de-facto model and cites §G cross-artifact coherence smells (unacknowledged term collision, orphan in map, slice contradiction); --design assembles the intended model from DOMAIN.md. Descriptive synthesis plus §G only — it does not roll up the slice verbs' own findings (that's audit). Writes docs/model-<date>.md; strategic and council-only, no remediate round-trip.",
+      "argumentHint": "[scope]",
+      "mode": "both",
+      "lens": "strategic",
+      "reference": "reference/model.md",
+      "signals": ["G"]
+    },
+    "audit": {
+      "description": "Whole-repo findings health report. Runs the mechanical detector (ddd-council-detect --json) for the §A/§B import-graph anti-patterns, harvests the council verbs' existing artifacts (critique/aggregate/repositories/events/distill/model findings under docs/), de-dups them into clusters by location and context-set (one entry per real issue, carrying every contributing signalId and the max severity), prioritises high→low weighted by distill's core classification, and lists coverage gaps (verbs not yet run). Runs zero council verbs by default; --fill [scope] opts into orchestrating the missing verbs in dependency order, logging any canon operator fork rather than fabricating it. Aggregates the existing §A–§G — no new signals; writes docs/audit-<date>.md; critique-only and strategic, no remediate round-trip. Completes Track D.",
+      "argumentHint": "[scope] [--fill] [--all]",
+      "mode": "critique",
+      "lens": "strategic",
+      "reference": "reference/audit.md",
+      "signals": ["A", "B", "C", "D", "E", "F", "G"]
     }
   }
 }

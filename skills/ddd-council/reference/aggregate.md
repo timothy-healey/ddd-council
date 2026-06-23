@@ -41,7 +41,7 @@ drop back to `boundaries`/`map` first — *strategic before tactical* is a share
 
 ## Signals
 
-Work from `reference/signals.md` **§D (tactical signals)** — the four root-level signals
+Work from `reference/signals/D-tactical.md` **§D (tactical signals)** — the four root-level signals
 `aggregate` owns: *anaemic domain model, god aggregate, transaction spanning aggregates,
 leaked invariant*. Each finding traces to a §D signal id and cites a code location. The
 other §D signals belong to later verbs; don't raise them here.

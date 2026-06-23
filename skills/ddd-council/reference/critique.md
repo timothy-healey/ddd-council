@@ -62,12 +62,12 @@ pretend the engine ran.
 
 It returns `{ findings: [Finding] }` — the `Finding` shape defined canonically in
 `cli/src/finding.mjs` — for the §B import-graph signals (leaky-boundary,
-circular-dependency, god-module, cross-context-coupling), mechanically, with exact
-locations. Treat each as a
+circular-dependency, god-module, cross-context-coupling) **and the schema-based
+`accidental-shared-kernel`**, mechanically, with exact locations. Treat each as a
 **grounded candidate**: the room confirms it against the code, judges intent, and
 the operator rules on whether it was deliberate. The engine finds; the council
 interprets. For signals the engine doesn't yet cover (§A boundary cues, §C
-language smells, schema-based shared kernel), the room reads the code itself.
+language smells), the room reads the code itself.
 
 ## How it runs
 
@@ -80,9 +80,16 @@ language smells, schema-based shared kernel), the room reads the code itself.
    `context-map.md`). Mark: matches, drift (intended X, code does Y), and
    surprises (relationships nobody declared).
 4. **Flag anti-patterns** with severity and citation, working from the shared
-   catalog in `reference/signals.md` (§A context-boundary signals, §B strategic
-   anti-patterns, §C language smells). Each finding traces to a signal id and a
-   code location.
+   catalog: `reference/signals/A-context-boundary.md` (§A), `reference/signals/B-strategic.md`
+   (§B), `reference/signals/C-language.md` (§C). Each finding traces to a signal id and a
+   code location. **Honour declared kernels (§B):** read the `tables` block of the
+   repo's `ddd-council.json` and apply the §B rule per its two cases —
+   `sharedKernel: true` → the engine suppressed it, so **name a Shared Kernel edge**
+   on the de-facto map (don't re-flag); declared `owner` → the engine still flagged
+   it, so **reframe that finding as a Customer-Supplier violation** (non-owner write
+   = downstream writing upstream's schema). An *undeclared* shared table (no
+   declaration; at most a derived owner) stays the `accidental-shared-kernel`
+   finding — distinguish drift from undeclared intent.
 5. **Pause** for the operator on each "is this deliberate?" question.
 
 ## Output — `docs/critique-<target-slug>-<date>.md`

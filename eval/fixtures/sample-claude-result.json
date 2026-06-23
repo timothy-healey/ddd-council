@@ -1,0 +1,7 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "result": "Brief: the Order aggregate is overloaded.\n\n```json\n[{\"signalId\":\"god-aggregate\",\"severity\":\"high\",\"file\":\"src/ordering/order.rs\",\"line\":12,\"message\":\"Order holds items, payment, shipment, customer, billing address\",\"suggestedMove\":\"split shipment/payment into referenced aggregates\"},{\"signalId\":\"leaked-invariant\",\"severity\":\"high\",\"file\":\"src/ordering/repository.rs\",\"line\":40,\"message\":\"add_line_item bypasses recalculate\",\"suggestedMove\":\"funnel mutation through the root\"}]\n```\n",
+  "usage": { "input_tokens": 5200, "output_tokens": 640, "cache_read_input_tokens": 1800 }
+}

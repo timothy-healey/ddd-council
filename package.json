@@ -1,0 +1,13 @@
+{
+  "name": "ddd-council-eval",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Token-efficiency eval harness for the ddd-council skill.",
+  "scripts": {
+    "test": "node --test 'eval/tests/**/*.test.mjs'",
+    "eval:surface": "node eval/surface.mjs",
+    "eval:bench": "node eval/bench.mjs"
+  },
+  "license": "Apache-2.0"
+}

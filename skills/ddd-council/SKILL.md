@@ -154,6 +154,19 @@ default.
   teaching asides, document written immediately. Genuine domain-fact pauses still
   happen in both. Override per call with `--brief` / `--workshop`.
 
+## Output modes
+
+- **`--findings-json`** (machine-readable findings). After the verb's normal
+  output, append exactly one fenced ` ```json ` block: an array of canonical
+  **Finding** objects — `{ signalId, severity, file, line, message, suggestedMove }`
+  — one per finding. `signalId` is the **kebab-case id** from the signal's
+  `(signalId: \`…\`)` marker in the signals catalog (`reference/signals/`) — e.g.
+  `god-aggregate`, **not** the prose bold name ("God aggregate"). `severity` is one of
+  `high|medium|low`. This is the same shape the detector emits
+  (`cli/src/finding.mjs`); it is the published surface the eval and `audit` consume.
+  Emit the block even when there are no findings (`[]`). Compatible with every verb;
+  combine with `--brief` for a lean run.
+
 ## Context acquisition
 
 Before the room convenes, build the council's footing from two layers:
@@ -170,7 +183,7 @@ to the `target` and lens so a large repo doesn't drown the room; if a strategic
 verb is run unscoped on a big repo, ask for a scope first. Cache the acquired
 model for the session; re-scan only when the target/scope changes.
 
-**What to look for:** `reference/signals.md` is the shared detection catalog —
+**What to look for:** `reference/signals/` is the shared detection catalog —
 the concrete code cues for context boundaries, strategic anti-patterns, and
 language smells. `critique`, `boundaries`, and `language` draw on it; every
 finding should trace to a signal and cite a location.
@@ -193,6 +206,10 @@ When a verb is invoked, load its reference file and follow it.
 | `value-objects` | `reference/entities-value-objects.md` | both | Alias of `entities` — the same playbook, entered from the value-object side. |
 | `repositories` | `reference/repositories.md` | both | Assess a context's persistence: one repository per aggregate root dealing in whole aggregates; cite §D repository-per-entity + domain-logic-in-the-service-layer; round-trips via `remediate`. |
 | `events` | `reference/events.md` | both | Assess the domain events an aggregate publishes (named business moments per state transition); cite §D missing-domain-events + §C CRUD-masking; round-trips via `remediate`. |
+| `distill` | `reference/distill.md` | both | Classify problem-space subdomains core/supporting/generic and map them onto contexts; cite §F mismatches; recommend where to invest. Owns the subdomain classification; strategic, no `remediate` round-trip. |
+| `model` | `reference/model.md` | both | Synthesise the full domain model across contexts from the per-verb artifacts; cite §G cross-artifact coherence smells on the seams. Descriptive synthesis + §G only (no findings roll-up — that's `audit`); strategic, no `remediate` round-trip. |
+| `audit` | `reference/audit.md` | critique | Whole-repo findings health report: run the detector, harvest the council artifacts, de-dup into prioritised clusters, list coverage gaps; `--fill` orchestrates the missing verbs. Aggregates §A–§G; no new signals, no `remediate` round-trip. |
 
 The tactical spine (`aggregate`, `entities`/`value-objects`, `repositories`, `events`) is
-complete. Roadmap verbs (meta: `model`, `distill`, `audit`) are added iteratively.
+complete, and Track D's meta verbs (`distill`, `model`, `audit`) have all shipped — the DDD verb
+spine is complete.

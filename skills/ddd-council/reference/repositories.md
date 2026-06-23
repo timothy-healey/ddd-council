@@ -50,7 +50,7 @@ drop back to `boundaries`/`map` first — *strategic before tactical* is a share
 
 ## Signals
 
-Work from `reference/signals.md`:
+Work from `reference/signals/D-tactical.md` **§D**:
 
 - **§D — repository-per-entity** (this verb owns it): a repository keyed to a child entity
   or value object instead of the aggregate root, or fragment persistence bypassing the root.

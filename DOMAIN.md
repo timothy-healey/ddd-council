@@ -28,8 +28,12 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
   published language / shared kernel between Council and Detector; worth naming
   explicitly when `boundaries` runs. Track B adds the first named terms here:
   `owner` (config override, messaging-only) and `sharedKernel` (declared-kernel
-  suppression, honoured Detector-side in v1; Council-side honouring is a named
-  follow-up). `owner` and the engine-derived `definedInContext` are one concept —
+  suppression). `sharedKernel` is now honoured **both Detector-side** (suppresses the
+  rule) **and Council-side** (`critique` names the declared Shared Kernel on the map;
+  `model`/`audit` inherit via the artifacts — the named follow-up is closed). `owner`
+  is messaging-side in the engine and, council-side, attributes the table and names a
+  Customer-Supplier relationship (a non-owner write is a customer-supplier violation).
+  `owner` and the engine-derived `definedInContext` are one concept —
   the table's owning context — in two provenances (carried inline here, not in the
   gitignored `docs/`).
   Track C publishes the **language-module interface** to this seam — the contract
@@ -48,6 +52,9 @@ _Inferred from repo structure — confirm/redraw with `critique` or `boundaries`
   is a table's home and supersedes a `'migration'` def-site (graph.mjs), so a
   migration-only (SQLx) table gets a context-less owner — the same "owned by none"
   semantics Diesel gets from `schema.rs`.
+  The `accidental-shared-kernel` rule is **column-aware**: on an unowned table it distinguishes
+  shared-data overlap (high/medium) from disjoint colocation (low — colocated concerns, split the
+  table), gated on resolved columns (a bare touch stays UNKNOWN, no downgrade).
 
 ## Domain experts
 _Seeded from general knowledge; refine the background/vocabulary as the operator
@@ -81,3 +88,18 @@ configuration): `owner`, `sharedKernel`, and the `owner`/`definedInContext` one-
 ruling. A fuller glossary is the `language` verb's output of record at
 `docs/ubiquitous-language.md` — kept local (`docs/` is gitignored), so it is absent
 from a clean checkout; the canonical home for any term load-bearing on the seam is here.
+
+- `distill` is the authority on the **subdomain** classification (core/supporting/generic); its
+  output of record is `docs/distill-<date>.md`, and its findings use the §F distillation smells
+  (`core-fragmented`, `mixed-subdomain-context`, `generic-over-built`, `under-invested-core`,
+  `gold-plated-supporting`). `map`'s per-context tag defers to it.
+- `model` synthesises the **whole-system model** across contexts from the per-verb artifacts (the
+  *slices*); its output of record is `docs/model-<date>.md`, and its findings use the §G
+  synthesis/coherence smells (`unacknowledged-term-collision`, `orphan-in-map`,
+  `slice-contradiction`) — cross-artifact contradictions only. `model` owns the *seams between
+  slices*, not any slice's interior; the findings roll-up is `audit`'s job.
+- `audit` is the whole-repo **findings health report**; its output of record is
+  `docs/audit-<date>.md`. It is the cross-half consumer of the **Council↔Detector seam** — it runs
+  the detector (`ddd-council-detect --json`) and folds its `Finding[]` in alongside the harvested
+  council-artifact findings, de-duped into *clusters* by location + context-set. Aggregates §A–§G
+  (no new signals); the findings roll-up `model`'s §G feeds into.

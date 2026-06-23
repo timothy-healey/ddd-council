@@ -33,7 +33,7 @@ once, ambiguous terms split and renamed — and, in critique mode, flag where th
 1. For each candidate term, capture **one meaning**. When a word carries two,
    **split it and name both** (a *Source* is not only a *Book*).
 2. In critique mode, grep the code for each term and its synonyms; record every
-   place the name diverges, with citations. Work from `reference/signals.md` §C
+   place the name diverges, with citations. Work from `reference/signals/C-language.md` §C
    (one concept/two names, one name/two concepts, technical names for domain
    concepts, CRUD masking intent, primitive obsession).
 3. Mark each term **settled** vs **emerging** — half-formed concepts can be captured

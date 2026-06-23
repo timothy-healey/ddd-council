@@ -28,7 +28,9 @@ reports what the code *is*.
    present, cross-check against its module structure (but intent leads here).
 2. **Walk a scenario or two** end-to-end to expose which contexts collaborate and
    where the boundaries actually fall.
-3. **Classify** each context: core (argue for it), supporting, generic.
+3. **Classify** each context: core (argue for it), supporting, generic — a one-word summary tag.
+   `distill` owns the deep core/supporting/generic call; when a `docs/distill-*.md` artifact
+   exists, take the classification from it rather than re-deriving here.
 4. **Name every relationship** using the standard patterns (see `boundaries.md`):
    shared kernel · customer–supplier · conformist · anti-corruption layer ·
    open-host service · published language · partnership · separate ways. Mark

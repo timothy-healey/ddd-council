@@ -40,7 +40,8 @@ seam: is this the right line, and what kind of relationship crosses it?
 1. Pick the seam (a pair, or a context against its neighbours).
 2. **Design mode:** recommend the pattern that *should* govern the seam and why.
    **Critique mode:** read the integration code and name the pattern that *is* in
-   force — citing the translation (or its absence). Use `reference/signals.md`
+   force — citing the translation (or its absence). Use `reference/signals/A-context-boundary.md`
+   §A (cohesion, language shift, separate persistence) and `reference/signals/B-strategic.md`
    §B (leaky boundary, accidental shared kernel, missing ACL, circular/chatty
    coupling) to read the seam from evidence.
 3. Flag mismatches: a conformist relationship that should have an ACL; a shared

@@ -51,7 +51,7 @@ back to `boundaries`/`map` first — *strategic before tactical* is a shared law
 
 ## Signals
 
-Work from `reference/signals.md`:
+Work from `reference/signals/D-tactical.md` (§D) and `reference/signals/C-language.md` (§C):
 
 - **§D — missing domain events** (this verb owns it): a domain-significant state transition
   that emits no event.
