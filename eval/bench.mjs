@@ -52,7 +52,7 @@ export const median = (nums) => {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 };
 
-function runCell(cell, model, runs) {
+function runCell(cell, model, runs, timeoutMs = 600_000) {
   const repoDir = join(REPO_ROOT, 'examples', cell.repo);
   const planted = plantedForVerb(parsePlanted(repoDir), cell.verb);
   if (!planted.length) return { ...cell, status: 'skipped', reason: 'no planted rows' };
@@ -61,15 +61,18 @@ function runCell(cell, model, runs) {
   const trials = [];
   for (let i = 0; i < runs; i++) {
     try {
+      // timeout caps a single session: on expiry execFileSync sends SIGTERM and throws,
+      // so a stuck `claude -p` becomes a recorded cell error instead of hanging the whole run.
       const out = execFileSync('claude',
         ['-p', prompt, '--output-format', 'json', ...(model ? ['--model', model] : [])],
-        { cwd: repoDir, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+        { cwd: repoDir, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: timeoutMs });
       // Normalize council ids (prose name OR kebab) to canonical signalId before scoring,
       // so a correct detection emitted as "god aggregate" matches planted "god-aggregate".
       const findings = parseFindings(out).map((f) => ({ ...f, signalId: canonicalId(f.signalId) }));
       trials.push({ ...score(findings, planted), tokens: parseUsage(out) });
     } catch (err) {
-      trials.push({ status: 'error', error: String(err.message || err).slice(0, 200) });
+      const msg = err.killed ? `timed out after ${timeoutMs / 1000}s` : String(err.message || err).slice(0, 200);
+      trials.push({ status: 'error', error: msg });
     }
   }
   const ok = trials.filter((t) => !t.status);
@@ -98,6 +101,8 @@ function main() {
   const model = (argv[argv.indexOf('--model') + 1] && argv.includes('--model')) ? argv[argv.indexOf('--model') + 1] : '';
   const runsRaw = argv.includes('--runs') ? Number(argv[argv.indexOf('--runs') + 1]) : 3;
   const runs = Number.isFinite(runsRaw) && runsRaw > 0 ? runsRaw : 3; // guard --runs NaN/0
+  const toRaw = argv.includes('--timeout') ? Number(argv[argv.indexOf('--timeout') + 1]) : 600;
+  const timeoutMs = (Number.isFinite(toRaw) && toRaw > 0 ? toRaw : 600) * 1000; // per-cell cap (s→ms), default 10m
 
   // Surface CELLS/PLANTED drift before spending tokens (plan-vet F3).
   try {
@@ -107,7 +112,7 @@ function main() {
     if (plantedWithoutCell.length) process.stdout.write(`WARN planted verbs with no cell (coverage gap): ${plantedWithoutCell.join(', ')}\n`);
   } catch { /* submodule not checked out — runCell will report per-cell */ }
 
-  const cells = CELLS.map((c) => runCell(c, model, runs));
+  const cells = CELLS.map((c) => runCell(c, model, runs, timeoutMs));
   const record = { date: new Date().toISOString(), model: model || 'default', runs, sha: gitSha(), cells };
 
   const dir = join(REPO_ROOT, 'eval', 'results');
